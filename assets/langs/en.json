@@ -1,3 +1,13 @@
 {
-  "app_title": "Punch"
+  "app_title": "Punch",
+  "good_morning": "Good Morning",
+  "good_afternoon": "Good Afternoon",
+  "good_evening": "Good Evening",
+  "good_night": "Good Night",
+  "welcome_to": "Welcome to",
+  "login": "Login",
+  "register": "Register",
+  "registration_code": "Registration Code",
+  "admin_reg_code_message": "Let's start with\nyour registration code",
+  "back": "Back"
 }

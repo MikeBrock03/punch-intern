@@ -73,7 +73,7 @@ class App extends StatelessWidget {
             builder: (cnx, value, ch){
               return MediaQuery(
                 data: data.copyWith(textScaleFactor: fontSizeController.baseTextScaleFactor + (value.value)  > 1.3 ? 1.3 : fontSizeController.baseTextScaleFactor + (value.value)),
-                child: Splash(),
+                child: child,
               );
             },
           );
