@@ -9,15 +9,26 @@ import '../../constants/app_colors.dart';
 import '../../helpers/app_localizations.dart';
 
 class Welcome extends StatelessWidget {
+
+  final _globalScaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _globalScaffoldKey,
+      appBar: AppBar(
+        brightness: Brightness.dark,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      extendBodyBehindAppBar: true,
       backgroundColor: Colors.white,
       body: welcomeBody(context),
     );
   }
 
   Widget welcomeBody(BuildContext context){
+
     return Stack(
       children: [
         Positioned(
@@ -91,12 +102,14 @@ class Welcome extends StatelessWidget {
             from: 10,
             child: Column(
               children: [
+
                 SizedBox(
                   width: 210,
                   height: 55,
                   child: OutlinedButton(
-                      onPressed: () {
-                        AppNavigator.push(context: context, page: Login());
+                      onPressed: () async{
+                        await Future.delayed(Duration(milliseconds: 200));
+                        AppNavigator.pushReplace(context: context, page: Login());
                       },
                       child: Text(AppLocalizations.of(context).translate('login'), style: TextStyle(color: AppColors.primaryColor, fontSize: 15, fontWeight: FontWeight.normal)),
                       style: OutlinedButton.styleFrom(
@@ -110,8 +123,9 @@ class Welcome extends StatelessWidget {
                   width: 210,
                   height: 55,
                   child: OutlinedButton(
-                    onPressed: () {
-                      AppNavigator.push(context: context, page: Register());
+                    onPressed: () async{
+                      await Future.delayed(Duration(milliseconds: 200));
+                      AppNavigator.pushReplace(context: context, page: Register());
                     },
                     child: Text(AppLocalizations.of(context).translate('register'), style: TextStyle(color: AppColors.primaryColor, fontSize: 15, fontWeight: FontWeight.normal)),
                     style: OutlinedButton.styleFrom(
@@ -119,7 +133,7 @@ class Welcome extends StatelessWidget {
                       shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0))
                     )
                   ),
-                )
+                ),
               ],
             ),
           )

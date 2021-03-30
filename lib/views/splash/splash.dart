@@ -2,10 +2,14 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:clippy_flutter/clippy_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../views/home/home.dart';
+import '../../helpers/app_navigator.dart';
+import '../../models/user_model.dart';
+import '../../views/welcome/welcome.dart';
 import '../../constants/app_colors.dart';
 import '../../config/app_config.dart';
-import '../../helpers/app_navigator.dart';
-import '../welcome/welcome.dart';
+
 
 class Splash extends StatefulWidget {
 
@@ -20,19 +24,25 @@ class _SplashState extends State<Splash> {
   @override
   void didChangeDependencies() {
     precacheImage(splashImage.image, context);
+    checkLogin(context);
     super.didChangeDependencies();
   }
 
-  @override
-  void initState() {
-    super.initState();
-    checkLogin(context);
-  }
-
   void checkLogin(BuildContext context) async{
-    await Future.delayed(Duration(milliseconds: 3000));
     try{
-      AppNavigator.pushReplace(context: context, page: Welcome());
+      await Future.delayed(Duration(milliseconds: 3000));
+
+      final user = context.read<UserModel>();
+      print(user);
+
+      if(user == null){
+        AppNavigator.pushReplace(context: context, page: Welcome());
+      }else {
+        if(user.uID != null){
+          // set user data
+          AppNavigator.pushReplace(context: context, page: Home());
+        }
+      }
     }catch(error){
       if(!AppConfig.isPublished){
         print('Error: $error');
@@ -42,7 +52,7 @@ class _SplashState extends State<Splash> {
 
   @override
   Widget build(BuildContext context) {
-
+    context.read<UserModel>();
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(

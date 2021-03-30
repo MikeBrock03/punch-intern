@@ -1,6 +1,10 @@
+
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'models/user_model.dart';
+import 'services/firebase_auth_service.dart';
 import 'config/app_config.dart';
 import 'constants/app_colors.dart';
 import 'database/storage.dart';
@@ -8,11 +12,15 @@ import 'helpers/app_localizations.dart';
 import 'view_models/font_size_controller.dart';
 import 'views/splash/splash.dart';
 
-void main() {
+Future <void> main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(
       MultiProvider(
           providers: [
             ChangeNotifierProvider<FontSizeController>(create: (BuildContext context) => FontSizeController()),
+            Provider<FirebaseAuthService>(create: (BuildContext context) => FirebaseAuthService()),
+            StreamProvider<UserModel>.value(value: FirebaseAuthService().authStateChanges, initialData: UserModel())
           ],
           child: App()
       )
@@ -25,7 +33,6 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     FontSizeController fontSizeController = Provider.of<FontSizeController>(context, listen: false);
 
     return MaterialApp(
@@ -125,3 +132,4 @@ class App extends StatelessWidget {
     }
   }
 }
+

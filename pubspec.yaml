@@ -16,15 +16,20 @@ dependencies:
 
   cupertino_icons: ^1.0.2
   provider: ^5.0.0
-  shared_preferences: ^2.0.4
+  shared_preferences: ^2.0.5
   animate_do: ^2.0.0
-  http: ^0.13.0
+  http: ^0.13.1
   data_connection_checker: ^0.3.4
-  cached_network_image: ^2.5.1
-  font_awesome_flutter: ^8.12.0
+  cached_network_image: ^3.0.0
+  font_awesome_flutter: ^9.0.0
   intl: ^0.17.0
-  firebase_auth: ^1.0.1
   clippy_flutter: ^1.1.1
+  flutter_focus_watcher: ^0.0.1
+  flutter_secure_storage: ^4.1.0
+  local_auth: ^1.1.0
+  firebase_core: ^1.0.2
+  firebase_auth: ^1.0.1
+  #cloud_firestore: ^1.0.3
 
 dev_dependencies:
   flutter_test:
