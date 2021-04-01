@@ -1,7 +1,15 @@
+import 'dart:io';
 import 'package:animate_do/animate_do.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
+import 'package:provider/provider.dart';
+import '../../services/firestore_service.dart';
+import '../../view_models/user_view_model.dart';
+import '../../views/verify/verify.dart';
+import '../../models/user_model.dart';
+import '../../services/firebase_auth_service.dart';
 import '../../views/welcome/welcome.dart';
 import '../../views/login/login.dart';
 import '../../helpers/app_navigator.dart';
@@ -14,6 +22,10 @@ import '../../helpers/progress_button.dart';
 import '../../helpers/app_localizations.dart';
 
 class Register extends StatefulWidget {
+
+  final dynamic verified;
+  Register({ this.verified });
+
   @override
   _RegisterState createState() => _RegisterState();
 }
@@ -43,7 +55,7 @@ class _RegisterState extends State<Register> with TickerProviderStateMixin{
     return FocusWatcher(
       child: WillPopScope(
         onWillPop: () async {
-          AppNavigator.pushReplace(context: context, page: Welcome());
+          AppNavigator.pushReplace(context: context, page: Welcome(verified: widget.verified));
           return true;
         },
         child: Scaffold(
@@ -55,7 +67,7 @@ class _RegisterState extends State<Register> with TickerProviderStateMixin{
             title: Text(AppLocalizations.of(context).translate('register'), style: TextStyle(fontSize: 17)),
             leading: IconButton(
               icon: Icon(Icons.arrow_back),
-              onPressed: () => AppNavigator.pushReplace(context: context, page: Welcome()),
+              onPressed: () => AppNavigator.pushReplace(context: context, page: Welcome(verified: widget.verified)),
             ),
           ),
           body: registerBody(),
@@ -139,6 +151,7 @@ class _RegisterState extends State<Register> with TickerProviderStateMixin{
                     labelText: AppLocalizations.of(context).translate('email'),
                     textInputFormatter: [FilteringTextInputFormatter.deny(RegExp('[ ]'))],
                     inputAction: TextInputAction.next,
+                    textInputType: TextInputType.emailAddress,
                     onValidate: (value){
 
                       Pattern pattern = '[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}';
@@ -248,7 +261,7 @@ class _RegisterState extends State<Register> with TickerProviderStateMixin{
                       child: TextButton(
                         onPressed: submitSt ? () async{
                           await Future.delayed(Duration(milliseconds: 200));
-                          AppNavigator.pushReplace(context: context, page: Login());
+                          AppNavigator.pushReplace(context: context, page: Login(verified: widget.verified));
                         } : null,
                         child: Text(AppLocalizations.of(context).translate('login_now'), style: TextStyle(color: AppColors.primaryColor, fontSize: 14, fontWeight: FontWeight.normal)),
                       )
@@ -275,8 +288,11 @@ class _RegisterState extends State<Register> with TickerProviderStateMixin{
       _buttonAnimationController.forward();
 
       setState(() {
+        firstNameSt = false;
+        lastNameSt = false;
         emailSt = false;
         passwordSt = false;
+        passwordRepeatSt = false;
         submitSt = false;
       });
 
@@ -284,10 +300,26 @@ class _RegisterState extends State<Register> with TickerProviderStateMixin{
 
       try{
 
-        /*result = await Provider.of<IdentityViewModel>(context, listen: false).login(
-            username: username.trim(),
+        result = await Provider.of<FirebaseAuthService>(context, listen: false).register(
+            email: email.trim(),
             password: password.trim()
-        );*/
+        );
+
+        if (result is UserModel) {
+          createProfile(result);
+        } else {
+          setState(() {
+            firstNameSt = true;
+            lastNameSt = true;
+            emailSt = true;
+            passwordSt = true;
+            passwordRepeatSt = true;
+            submitSt = true;
+          });
+
+          _buttonAnimationController.reverse();
+          Message.show(_globalScaffoldKey, result.toString());
+        }
 
       }catch(error){
         if(!AppConfig.isPublished){
@@ -295,31 +327,67 @@ class _RegisterState extends State<Register> with TickerProviderStateMixin{
         }
 
         setState(() {
+          firstNameSt = true;
+          lastNameSt = true;
           emailSt = true;
           passwordSt = true;
+          passwordRepeatSt = true;
           submitSt = true;
         });
 
         _buttonAnimationController.reverse();
         Message.show(_globalScaffoldKey, error);
-      }finally{
-
-        /*if (result is bool && result) {
-          await getData();
-          AppNavigator.pushReplace(context: context, page: Home());
-        } else {
-
-          setState(() {
-            usernameSt = true;
-            passwordSt = true;
-            submitSt = true;
-          });
-
-          _buttonAnimationController.reverse();
-          Message.show(_globalScaffoldKey, result.toString());
-        }*/
-
       }
+    }
+  }
+
+  void createProfile(UserModel model) async{
+
+    try{
+      String regCode = model.uID.toUpperCase().substring(0, 6);
+
+      UserModel userModel = UserModel(
+        uID: model.uID,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
+        tel: '',
+        mobile: '',
+        address: '',
+        platform: Platform.operatingSystem,
+        registererID: '',
+        createdAt: Timestamp.now(),
+        imageURL: '',
+        roleID: AppConfig.userRole.toDouble(),
+        tags: [firstName.trim().toLowerCase(), lastName.trim().toLowerCase(), '${firstName.trim().toLowerCase()} ${lastName.trim().toLowerCase()}' , email.trim().toLowerCase(), regCode],
+        regCode: regCode,
+        status: true,
+        verified: false,
+        hasPassword: AppConfig.userRole == 10 ? true : false
+      );
+
+      await Provider.of<FirestoreService>(context, listen: false).createProfile(userModel: userModel);
+      Provider.of<UserViewModel>(context, listen: false).setUserModel(userModel);
+      await Provider.of<UserViewModel>(context, listen: false).sendEmail( message: 'Your registration code is: $regCode', email: userModel.email);
+
+      AppNavigator.pushReplace(context: context, page: Verify());
+
+    }catch(error){
+      if(!AppConfig.isPublished){
+        print('$error');
+      }
+
+      setState(() {
+        firstNameSt = true;
+        lastNameSt = true;
+        emailSt = true;
+        passwordSt = true;
+        passwordRepeatSt = true;
+        submitSt = true;
+      });
+
+      _buttonAnimationController.reverse();
+      Message.show(_globalScaffoldKey, error);
     }
   }
 }

@@ -1,10 +1,12 @@
 import 'package:animate_do/animate_do.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:provider/provider.dart';
 import 'package:punch_app/models/user_model.dart';
+import 'package:punch_app/services/firestore_service.dart';
+import 'package:punch_app/view_models/user_view_model.dart';
+import 'package:punch_app/views/verify/verify.dart';
 import 'package:punch_app/views/welcome/welcome.dart';
 import '../../services/firebase_auth_service.dart';
 import '../../views/home/home.dart';
@@ -19,6 +21,10 @@ import '../../helpers/progress_button.dart';
 import '../../helpers/app_localizations.dart';
 
 class Login extends StatefulWidget {
+
+  final dynamic verified;
+  Login({ this.verified });
+
   @override
   _LoginState createState() => _LoginState();
 }
@@ -48,7 +54,7 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
     return FocusWatcher(
       child: WillPopScope(
         onWillPop: () async {
-          AppNavigator.pushReplace(context: context, page: Welcome());
+          AppNavigator.pushReplace(context: context, page: Welcome(verified: widget.verified));
           return true;
         },
         child: Scaffold(
@@ -61,7 +67,7 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
             title: Text(AppLocalizations.of(context).translate('login'), style: TextStyle(fontSize: 17)),
             leading: IconButton(
               icon: Icon(Icons.arrow_back),
-              onPressed: () => AppNavigator.pushReplace(context: context, page: Welcome()),
+              onPressed: () => AppNavigator.pushReplace(context: context, page: Welcome(verified: widget.verified)),
             ),
           ),
           body: loginBody(),
@@ -178,7 +184,7 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
                           child: TextButton(
                             onPressed: submitSt ? () async{
                               await Future.delayed(Duration(milliseconds: 200));
-                              AppNavigator.pushReplace(context: context, page: Register());
+                              AppNavigator.pushReplace(context: context, page: Register(verified: widget.verified));
                             } : null,
                             child: Text(AppLocalizations.of(context).translate('register_now'), style: TextStyle(color: AppColors.primaryColor, fontSize: 14, fontWeight: FontWeight.normal)),
                           )
@@ -237,8 +243,7 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
       }finally{
 
         if (result is UserModel) {
-          //await getData();
-          AppNavigator.pushReplace(context: context, page: Home());
+          getData(result);
         } else {
           setState(() {
             emailSt = true;
@@ -250,6 +255,56 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
           Message.show(_globalScaffoldKey, result.toString());
         }
       }
+    }
+  }
+
+  void getData(UserModel user) async{
+    try{
+      if (user.uID != null) {
+
+        dynamic result = await Provider.of<FirestoreService>(context, listen: false).getUserData(uID: user.uID);
+        if (result is UserModel) {
+          if (result.status) {
+            Provider.of<UserViewModel>(context, listen: false).setUserModel(result);
+            if (result.verified) {
+              AppNavigator.pushReplace(context: context, page: Home());
+            } else {
+              AppNavigator.pushReplace(context: context, page: Verify());
+            }
+          } else {
+            setState(() {
+              emailSt = true;
+              passwordSt = true;
+              submitSt = true;
+            });
+
+            _buttonAnimationController.reverse();
+            Message.show(_globalScaffoldKey, AppLocalizations.of(context).translate('suspended_account_message'));
+          }
+        } else {
+          setState(() {
+            emailSt = true;
+            passwordSt = true;
+            submitSt = true;
+          });
+
+          _buttonAnimationController.reverse();
+          Message.show(_globalScaffoldKey, AppLocalizations.of(context).translate('receive_error_description'));
+        }
+      }
+    }catch(error){
+      if(!AppConfig.isPublished){
+        print('$error');
+      }
+
+      setState(() {
+        emailSt = true;
+        passwordSt = true;
+        submitSt = true;
+      });
+
+      _buttonAnimationController.reverse();
+      Message.show(_globalScaffoldKey, AppLocalizations.of(context).translate('receive_error_description'));
     }
   }
 }

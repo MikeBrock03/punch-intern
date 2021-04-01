@@ -3,6 +3,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'services/firestore_service.dart';
+import 'view_models/user_view_model.dart';
 import 'models/user_model.dart';
 import 'services/firebase_auth_service.dart';
 import 'config/app_config.dart';
@@ -19,7 +21,9 @@ Future <void> main() async{
       MultiProvider(
           providers: [
             ChangeNotifierProvider<FontSizeController>(create: (BuildContext context) => FontSizeController()),
+            ChangeNotifierProvider<UserViewModel>(create: (BuildContext context) => UserViewModel()),
             Provider<FirebaseAuthService>(create: (BuildContext context) => FirebaseAuthService()),
+            Provider<FirestoreService>(create: (BuildContext context) => FirestoreService()),
             StreamProvider<UserModel>.value(value: FirebaseAuthService().authStateChanges, initialData: UserModel())
           ],
           child: App()

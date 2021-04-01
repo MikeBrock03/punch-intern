@@ -1,6 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:clippy_flutter/diagonal.dart';
 import 'package:flutter/material.dart';
+import '../../views/verify/verify.dart';
 import '../../views/login/login.dart';
 import '../../views/register/register.dart';
 import '../../config/app_config.dart';
@@ -9,6 +10,9 @@ import '../../constants/app_colors.dart';
 import '../../helpers/app_localizations.dart';
 
 class Welcome extends StatelessWidget {
+
+  final dynamic verified;
+  Welcome({ this.verified });
 
   final _globalScaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -109,7 +113,7 @@ class Welcome extends StatelessWidget {
                   child: OutlinedButton(
                       onPressed: () async{
                         await Future.delayed(Duration(milliseconds: 200));
-                        AppNavigator.pushReplace(context: context, page: Login());
+                        AppNavigator.pushReplace(context: context, page: Login(verified: verified));
                       },
                       child: Text(AppLocalizations.of(context).translate('login'), style: TextStyle(color: AppColors.primaryColor, fontSize: 15, fontWeight: FontWeight.normal)),
                       style: OutlinedButton.styleFrom(
@@ -125,7 +129,7 @@ class Welcome extends StatelessWidget {
                   child: OutlinedButton(
                     onPressed: () async{
                       await Future.delayed(Duration(milliseconds: 200));
-                      AppNavigator.pushReplace(context: context, page: Register());
+                      AppNavigator.pushReplace(context: context, page: Register(verified: verified));
                     },
                     child: Text(AppLocalizations.of(context).translate('register'), style: TextStyle(color: AppColors.primaryColor, fontSize: 15, fontWeight: FontWeight.normal)),
                     style: OutlinedButton.styleFrom(
@@ -134,6 +138,26 @@ class Welcome extends StatelessWidget {
                     )
                   ),
                 ),
+                verified != null && verified == false ? Column(
+                  children: [
+                    SizedBox(height: 20),
+                    SizedBox(
+                      width: 210,
+                      height: 55,
+                      child: OutlinedButton(
+                          onPressed: () async{
+                            await Future.delayed(Duration(milliseconds: 200));
+                            AppNavigator.pushReplace(context: context, page: Verify());
+                          },
+                          child: Text(AppLocalizations.of(context).translate('enter_reg_code'), style: TextStyle(color: AppColors.primaryColor, fontSize: 15, fontWeight: FontWeight.normal)),
+                          style: OutlinedButton.styleFrom(
+                              side: BorderSide(width: 1, color: AppColors.primaryColor),
+                              shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0))
+                          )
+                      ),
+                    ),
+                  ],
+                ) : Container()
               ],
             ),
           )
