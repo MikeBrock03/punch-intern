@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import '../../views/company_form/company_form.dart';
 import '../../view_models/user_view_model.dart';
 import '../../helpers/message.dart';
-import '../../views/home/fragments/employer_fragment/employer_fragment.dart';
 import '../../database/storage.dart';
 import '../../constants/app_colors.dart';
 import '../../helpers/question_dialog.dart';
@@ -14,7 +14,6 @@ import '../../config/app_config.dart';
 import '../../helpers/app_localizations.dart';
 import '../../helpers/app_navigator.dart';
 import '../../services/firebase_auth_service.dart';
-import '../../views/profile/profile.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -26,7 +25,7 @@ class _HomeState extends State<Home> {
   final Storage storage = new Storage();
   final globalScaffoldKey = GlobalKey<ScaffoldState>();
   int bottomSelectedIndex = 0;
-  var _internPage, _companyPage, _employerPage;
+  var _internPage, _companyPage;
   int backPress = 0;
 
   @override
@@ -59,11 +58,11 @@ class _HomeState extends State<Home> {
           title: Text(AppLocalizations.of(context).translate('app_title'), style: TextStyle(fontSize: 18)),
           centerTitle: true,
           brightness: Brightness.dark,
-          leading: IconButton(
+          /*leading: IconButton(
             tooltip: AppLocalizations.of(context).translate('profile'),
             icon: Icon(Icons.person),
             onPressed: () => AppNavigator.push(context: context, page: Profile()),
-          ),
+          ),*/
           actions: [
             Padding(
               padding: const EdgeInsets.all(5.0),
@@ -76,7 +75,24 @@ class _HomeState extends State<Home> {
           ],
         ),
         body: buildPageView(),
-        bottomNavigationBar: bottomNavBar()
+        bottomNavigationBar: bottomNavBar(),
+        floatingActionButton: FloatingActionButton(
+          heroTag: null,
+          backgroundColor: AppColors.primaryColor,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          child: Icon(Icons.add, size: 25,),
+          onPressed: () {
+            switch (bottomSelectedIndex) {
+              case 0:
+
+                break;
+              case 1:
+                AppNavigator.push(context: context, page: CompanyForm());
+                break;
+            }
+          },
+        ),
       ),
     );
   }
@@ -103,13 +119,12 @@ class _HomeState extends State<Home> {
     return PageView.builder(
       itemBuilder: (context, index) {
         if (index == 0) return this.internInit();
-        if (index == 1) return this.employerInit();
-        if (index == 2) return this.companyInit();
+        if (index == 1) return this.companyInit();
         return null;
       },
       physics: BouncingScrollPhysics(),
       controller: pageController,
-      itemCount: 3,
+      itemCount: 2,
       onPageChanged: (index) {
         pageChanged(index);
         FocusScope.of(context).requestFocus(new FocusNode());
@@ -139,10 +154,6 @@ class _HomeState extends State<Home> {
               title: Padding( padding: EdgeInsets.fromLTRB(0, 4, 0, 0),child: Text(AppLocalizations.of(context).translate('interns'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.normal)))
           ),
           BottomNavigationBarItem(
-              icon: FaIcon(FontAwesomeIcons.addressCard, size: 22),
-              title: Padding( padding: EdgeInsets.fromLTRB(0, 4, 0, 0),child: Text(AppLocalizations.of(context).translate('employers'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.normal)))
-          ),
-          BottomNavigationBarItem(
               icon: FaIcon(FontAwesomeIcons.building, size: 22),
               title: Padding( padding: EdgeInsets.fromLTRB(0, 4, 0, 0),child: Text(AppLocalizations.of(context).translate('companies'), style: TextStyle(fontSize: 11, fontWeight: FontWeight.normal)))
           ),
@@ -155,11 +166,6 @@ class _HomeState extends State<Home> {
   Widget internInit(){
     if(this._internPage == null) this._internPage = InternFragment(globalScaffoldKey: globalScaffoldKey);
     return this._internPage;
-  }
-
-  Widget employerInit(){
-    if(this._employerPage == null) this._employerPage = EmployerFragment(globalScaffoldKey: globalScaffoldKey);
-    return this._employerPage;
   }
 
   Widget companyInit(){

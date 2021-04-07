@@ -16,16 +16,6 @@ class _InternFragmentState extends State<InternFragment> with AutomaticKeepAlive
   Widget build(BuildContext context) {
     return Scaffold(
       body: internFragmentBody(),
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'addIntern',
-        backgroundColor: AppColors.primaryColor,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        child: Icon(Icons.add, size: 25,),
-        onPressed: () {
-
-        },
-      ),
     );
   }
 

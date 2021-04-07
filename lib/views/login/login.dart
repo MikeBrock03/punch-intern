@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:provider/provider.dart';
-import 'package:punch_app/models/user_model.dart';
-import 'package:punch_app/services/firestore_service.dart';
-import 'package:punch_app/view_models/user_view_model.dart';
-import 'package:punch_app/views/verify/verify.dart';
-import 'package:punch_app/views/welcome/welcome.dart';
+import '../../database/storage.dart';
+import '../../models/user_model.dart';
+import '../../services/firestore_service.dart';
+import '../../view_models/user_view_model.dart';
+import '../../views/verify/verify.dart';
+import '../../views/welcome/welcome.dart';
 import '../../services/firebase_auth_service.dart';
 import '../../views/home/home.dart';
 import '../../helpers/app_navigator.dart';
@@ -35,6 +36,7 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
   final _globalScaffoldKey = GlobalKey<ScaffoldState>();
   AnimationController _buttonAnimationController;
   ScrollController scrollController = ScrollController();
+  final Storage storage = new Storage();
 
   String email, password;
   bool emailSt = true, passwordSt = true, submitSt = true;
@@ -265,11 +267,24 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
         dynamic result = await Provider.of<FirestoreService>(context, listen: false).getUserData(uID: user.uID);
         if (result is UserModel) {
           if (result.status) {
-            Provider.of<UserViewModel>(context, listen: false).setUserModel(result);
-            if (result.verified) {
-              AppNavigator.pushReplace(context: context, page: Home());
-            } else {
-              AppNavigator.pushReplace(context: context, page: Verify());
+
+            if(result.roleID == AppConfig.adminUserRole.toDouble()){
+              Provider.of<UserViewModel>(context, listen: false).setUserModel(result);
+              if (result.verified) {
+                AppNavigator.pushReplace(context: context, page: Home());
+              } else {
+                AppNavigator.pushReplace(context: context, page: Verify());
+              }
+            }else{
+              await performLogout();
+              setState(() {
+                emailSt = true;
+                passwordSt = true;
+                submitSt = true;
+              });
+
+              _buttonAnimationController.reverse();
+              Message.show(_globalScaffoldKey, AppLocalizations.of(context).translate('login_permission'));
             }
           } else {
             setState(() {
@@ -305,6 +320,18 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
 
       _buttonAnimationController.reverse();
       Message.show(_globalScaffoldKey, AppLocalizations.of(context).translate('receive_error_description'));
+    }
+  }
+
+  Future<void> performLogout() async{
+    try{
+      await Provider.of<FirebaseAuthService>(context, listen: false).signOut();
+      await storage.clearAll();
+      Provider.of<UserViewModel>(context, listen: false).setUserModel(null);
+    }catch(error) {
+      if (!AppConfig.isPublished) {
+        print('Error: $error');
+      }
     }
   }
 }

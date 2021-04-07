@@ -1,6 +1,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import '../config/app_config.dart';
 import '../models/user_model.dart';
 
@@ -58,6 +58,29 @@ class FirestoreService {
         'verified' : true
       });
       return true;
+    }catch(error){
+      if(!AppConfig.isPublished){
+        return error;
+      }
+    }
+  }
+
+  Future<dynamic> getCompanies({ String uID }) async{
+    try{
+      dynamic result;
+      await userCollection
+          .where("role_id", isEqualTo: AppConfig.employerUserRole)
+          .where("registerer_id", isEqualTo: uID)
+          .where("status", isEqualTo: true)
+          .orderBy("created_at", descending: true)
+          .get()
+          .then((querySnapshot){
+              if(querySnapshot.docs.isNotEmpty){
+                result = querySnapshot.docs;
+              }
+            }
+          );
+      return result;
     }catch(error){
       if(!AppConfig.isPublished){
         return error;

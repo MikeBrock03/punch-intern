@@ -102,6 +102,7 @@ class _RegisterState extends State<Register> with TickerProviderStateMixin{
                   AppTextField(
                     isEnable: firstNameSt,
                     labelText: AppLocalizations.of(context).translate('first_name'),
+                    textCapitalization: TextCapitalization.sentences,
                     inputAction: TextInputAction.next,
                     onValidate: (value){
 
@@ -126,6 +127,7 @@ class _RegisterState extends State<Register> with TickerProviderStateMixin{
                     isEnable: lastNameSt,
                     labelText: AppLocalizations.of(context).translate('last_name'),
                     inputAction: TextInputAction.next,
+                    textCapitalization: TextCapitalization.sentences,
                     onValidate: (value){
 
                       if (value.isEmpty) {
@@ -358,12 +360,12 @@ class _RegisterState extends State<Register> with TickerProviderStateMixin{
         registererID: '',
         createdAt: Timestamp.now(),
         imageURL: '',
-        roleID: AppConfig.userRole.toDouble(),
+        roleID: AppConfig.adminUserRole.toDouble(),
         tags: [firstName.trim().toLowerCase(), lastName.trim().toLowerCase(), '${firstName.trim().toLowerCase()} ${lastName.trim().toLowerCase()}' , email.trim().toLowerCase(), regCode],
         regCode: regCode,
         status: true,
         verified: false,
-        hasPassword: AppConfig.userRole == 10 ? true : false
+        hasPassword: AppConfig.adminUserRole == 10 ? true : false
       );
 
       await Provider.of<FirestoreService>(context, listen: false).createProfile(userModel: userModel);

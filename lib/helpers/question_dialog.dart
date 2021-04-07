@@ -66,7 +66,7 @@ class _QuestionDialogState extends State<QuestionDialog> with SingleTickerProvid
                           height: 90,
                           color: Colors.white,
                           child: Center(
-                            child: Text(widget.title, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.grey[600]), textAlign: TextAlign.center),
+                            child: Text(widget.title, style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14, color: Colors.grey[600]), textAlign: TextAlign.center),
                           )
                       ),
                       Divider(height: 0, color: Colors.grey[300], thickness: 0.5),
@@ -89,7 +89,7 @@ class _QuestionDialogState extends State<QuestionDialog> with SingleTickerProvid
                                         Navigator.pop(context);
                                       });
                                     },
-                                    child: Text('No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.blue[600]), textAlign: TextAlign.center)
+                                    child: Text('No', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14, color: Colors.blue[600]), textAlign: TextAlign.center)
                                 ),
                               ),
                             ),
@@ -107,7 +107,7 @@ class _QuestionDialogState extends State<QuestionDialog> with SingleTickerProvid
                                         Navigator.pop(context);
                                       });
                                     },
-                                    child: Text('Yes', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 13, color: Colors.blue[600]), textAlign: TextAlign.center)
+                                    child: Text('Yes', style: TextStyle(fontWeight: FontWeight.normal, fontSize: 14, color: Colors.blue[600]), textAlign: TextAlign.center)
                                 ),
                               ),
                             ),

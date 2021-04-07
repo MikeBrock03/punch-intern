@@ -17,10 +17,11 @@ class AppTextField extends StatefulWidget {
   final bool isPassword;
   final bool autoFocus;
   final TextDirection textDirection;
+  final TextCapitalization textCapitalization;
   final List<TextInputFormatter> textInputFormatter;
   final Widget prefixIcon;
 
-  AppTextField({ this.maxLine, this.autoFocus, this.inputAction , this.onFieldSubmitted, this.onEditingComplete, this.onValidate, @required this.labelText, this.textInputType, this.isPassword, this.textDirection, this.value, this.onChanged, this.textInputFormatter, this.isEnable, this.prefixIcon});
+  AppTextField({ this.maxLine, this.autoFocus, this.inputAction , this.textCapitalization, this.onFieldSubmitted, this.onEditingComplete, this.onValidate, @required this.labelText, this.textInputType, this.isPassword, this.textDirection, this.value, this.onChanged, this.textInputFormatter, this.isEnable, this.prefixIcon});
 
   @override
   _AppTextFieldState createState() => _AppTextFieldState();
@@ -68,6 +69,7 @@ class _AppTextFieldState extends State<AppTextField> {
           autofocus: widget.autoFocus != null ? widget.autoFocus : false,
           keyboardType: widget.textInputType != null ? widget.textInputType : TextInputType.text,
           obscureText: widget.isPassword != null ? widget.isPassword : false,
+          textCapitalization: widget.textCapitalization != null ? widget.textCapitalization : TextCapitalization.none,
           onFieldSubmitted: (term){
             widget.onFieldSubmitted != null ? widget.onFieldSubmitted(term) : FocusScope.of(context).nextFocus();
           },

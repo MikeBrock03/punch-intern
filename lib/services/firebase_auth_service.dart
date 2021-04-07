@@ -1,5 +1,6 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import '../database/storage.dart';
 import '../models/user_model.dart';
 
@@ -25,6 +26,18 @@ class FirebaseAuthService {
       storage.saveBool('verified', false);
       return _userFromFirebaseUser(result.user);
     } on FirebaseAuthException catch(error){
+      return error.message;
+    }
+  }
+
+  Future<dynamic> registerWithoutAuth({ String email }) async {
+    FirebaseApp app = await Firebase.initializeApp(name: 'Secondary', options: Firebase.app().options);
+    String password = 'f8a89e';
+    try {
+      UserCredential result = await FirebaseAuth.instanceFor(app: app).createUserWithEmailAndPassword(email: email, password: password);
+      await app.delete();
+      return _userFromFirebaseUser(result.user);
+    }on FirebaseAuthException catch(error){
       return error.message;
     }
   }

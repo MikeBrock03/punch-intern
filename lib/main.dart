@@ -3,7 +3,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'services/firebase_storage.dart';
 import 'services/firestore_service.dart';
+import 'view_models/companies_view_model.dart';
 import 'view_models/user_view_model.dart';
 import 'models/user_model.dart';
 import 'services/firebase_auth_service.dart';
@@ -22,8 +24,10 @@ Future <void> main() async{
           providers: [
             ChangeNotifierProvider<FontSizeController>(create: (BuildContext context) => FontSizeController()),
             ChangeNotifierProvider<UserViewModel>(create: (BuildContext context) => UserViewModel()),
+            ChangeNotifierProvider<CompaniesViewModel>(create: (BuildContext context) => CompaniesViewModel()),
             Provider<FirebaseAuthService>(create: (BuildContext context) => FirebaseAuthService()),
             Provider<FirestoreService>(create: (BuildContext context) => FirestoreService()),
+            Provider<FirebaseStorage>(create: (BuildContext context) => FirebaseStorage()),
             StreamProvider<UserModel>.value(value: FirebaseAuthService().authStateChanges, initialData: UserModel())
           ],
           child: App()
@@ -42,7 +46,6 @@ class App extends StatelessWidget {
     return MaterialApp(
         title: AppConfig.appName,
         debugShowCheckedModeBanner: false,
-
         theme: ThemeData(
           backgroundColor: Colors.white,
           primaryColor:  AppColors.primaryColor,

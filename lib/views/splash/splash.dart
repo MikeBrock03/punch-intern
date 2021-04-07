@@ -3,6 +3,8 @@ import 'package:animate_do/animate_do.dart';
 import 'package:clippy_flutter/clippy_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../view_models/companies_view_model.dart';
+import '../../services/firebase_auth_service.dart';
 import '../../helpers/app_localizations.dart';
 import '../../views/error/error.dart';
 import '../../helpers/helper.dart';
@@ -50,14 +52,18 @@ class _SplashState extends State<Splash> {
             // set user data
             dynamic result = await Provider.of<FirestoreService>(context, listen: false).getUserData(uID: user.uID);
             if (result is UserModel) {
-              print('resultttt : $result');
               if (result.status) {
-                Provider.of<UserViewModel>(context, listen: false).setUserModel(
-                    result);
-                if (result.verified) {
-                  AppNavigator.pushReplace(context: context, page: Home());
-                } else {
-                  AppNavigator.pushReplace(context: context, page: Verify());
+
+                if(result.roleID == AppConfig.adminUserRole.toDouble()){
+                  Provider.of<UserViewModel>(context, listen: false).setUserModel(result);
+                  if (result.verified) {
+                    await Provider.of<CompaniesViewModel>(context, listen: false).fetchData(uID: Provider.of<UserViewModel>(context, listen: false).uID);
+                    AppNavigator.pushReplace(context: context, page: Home());
+                  } else {
+                    AppNavigator.pushReplace(context: context, page: Verify());
+                  }
+                }else{
+                  performLogout();
                 }
               } else {
                 // error page
@@ -158,5 +164,18 @@ class _SplashState extends State<Splash> {
         ],
       ),
     );
+  }
+
+  void performLogout() async{
+    try{
+      await Provider.of<FirebaseAuthService>(context, listen: false).signOut();
+      await storage.clearAll();
+      Provider.of<UserViewModel>(context, listen: false).setUserModel(null);
+      AppNavigator.pushReplace(context: context, page: Welcome());
+    }catch(error) {
+      if (!AppConfig.isPublished) {
+        print('Error: $error');
+      }
+    }
   }
 }
