@@ -7,7 +7,7 @@ import '../../../constants/app_colors.dart';
 import '../../../helpers/app_localizations.dart';
 import '../../../helpers/image_dialog.dart';
 
-class LogoPicker extends StatefulWidget {
+class AvatarPicker extends StatefulWidget {
 
   final String imageURL;
   final Function() onTap;
@@ -15,13 +15,13 @@ class LogoPicker extends StatefulWidget {
   final Function(String imageDir) onImageCaptured;
   final GlobalKey<ScaffoldState> globalKey;
 
-  LogoPicker({ @required this.imageURL, this.onTap, this.onImageCaptured, this.globalKey, this.enabled = true });
+  AvatarPicker({ @required this.imageURL, this.onTap, this.onImageCaptured, this.globalKey, this.enabled = true });
 
   @override
   _LogoPickerState createState() => _LogoPickerState();
 }
 
-class _LogoPickerState extends State<LogoPicker> {
+class _LogoPickerState extends State<AvatarPicker> {
 
   final picker = ImagePicker();
   String _imageFile;
@@ -52,10 +52,10 @@ class _LogoPickerState extends State<LogoPicker> {
       child: Container(
         decoration: BoxDecoration(
             color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(15)
+            borderRadius: BorderRadius.circular(500)
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(800),
           child: _imageFile != null ? Image.file(
             File(_imageFile),
             width: double.infinity,
@@ -65,7 +65,7 @@ class _LogoPickerState extends State<LogoPicker> {
             children: <Widget>[
               Icon(Icons.local_see, color: AppColors.normalText, size: 50),
               SizedBox(height: 5),
-              Text(AppLocalizations.of(context).translate('company_logo'), style: TextStyle(color: AppColors.normalText, fontSize: 13))
+              Text(AppLocalizations.of(context).translate('intern_avatar'), style: TextStyle(color: AppColors.normalText, fontSize: 13))
             ],
           ),
         ),
@@ -119,7 +119,7 @@ class _LogoPickerState extends State<LogoPicker> {
   Future<String> imageCropper({ String imagePath }) async{
     File croppedFile = await ImageCropper.cropImage(
         sourcePath: imagePath,
-        cropStyle: CropStyle.rectangle,
+        cropStyle: CropStyle.circle,
         compressQuality: 70,
         aspectRatioPresets: [
           CropAspectRatioPreset.square,

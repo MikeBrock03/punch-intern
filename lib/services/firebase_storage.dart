@@ -25,4 +25,24 @@ class FirebaseStorage {
       return error;
     }
   }
+
+  Future<dynamic> uploadAvatar({ String imagePath }) async{
+
+    dynamic result;
+
+    try {
+      var logoRef = storageRef.child('avatar/${Path.basename(imagePath)}');
+      await logoRef.putFile(File(imagePath)).whenComplete(() async {
+        await logoRef.getDownloadURL().then((value) => {
+          if(value != null){
+            result = value
+          }
+        });
+      });
+      return result;
+    } catch(error){
+      print('upload image error : $error');
+      return error;
+    }
+  }
 }

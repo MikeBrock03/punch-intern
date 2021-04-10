@@ -87,4 +87,25 @@ class FirestoreService {
       }
     }
   }
+
+  List<UserModel> _internListFromSnapshot(QuerySnapshot snapshot){
+    return snapshot.docs.map<UserModel>((model) => UserModel.fromJson(model.id, model.data())).toList();
+  }
+
+  Stream<List<UserModel>> getRealTimeInterns({ String uID }) {
+
+    try{
+      return userCollection
+          .where("role_id", isEqualTo: AppConfig.internUserRole)
+          .where("registerer_id", isEqualTo: uID)
+          .where("status", isEqualTo: true)
+          .orderBy("created_at", descending: true)
+          .snapshots().map(_internListFromSnapshot);
+    }catch(error){
+      if(!AppConfig.isPublished){
+        print('Error: $error');
+      }
+      return null;
+    }
+  }
 }

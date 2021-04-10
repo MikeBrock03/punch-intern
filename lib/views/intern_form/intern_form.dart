@@ -1,4 +1,25 @@
+
+import 'dart:io';
+import 'package:animate_do/animate_do.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
+import 'package:provider/provider.dart';
+import 'components/avatar_picker.dart';
+import 'components/time_picker_field.dart';
+import '../../view_models/companies_view_model.dart';
+import '../../services/firebase_storage.dart';
+import '../../helpers/loading_dialog.dart';
+import '../../services/firebase_auth_service.dart';
+import '../../models/user_model.dart';
+import '../../services/firestore_service.dart';
+import '../../view_models/user_view_model.dart';
+import '../../helpers/fading_edge_scrollview.dart';
+import '../../helpers/app_text_field.dart';
+import '../../config/app_config.dart';
+import '../../helpers/app_localizations.dart';
+import '../../helpers/message.dart';
 
 class InternForm extends StatefulWidget {
   @override
@@ -6,16 +27,556 @@ class InternForm extends StatefulWidget {
 }
 
 class _InternFormState extends State<InternForm> {
+
+  final _formKey = GlobalKey<FormState>();
+  final _globalScaffoldKey = GlobalKey<ScaffoldState>();
+  ScrollController scrollController = ScrollController();
+
+  String companyID, companyName, firstName, lastName, email, imageUrl;
+
+  DateTime satInTime, satOutTime, sunInTime, sunOutTime, monInTime, monOutTime,
+      tusInTime, tusOutTime, wedInTime, wedOutTime, thiInTime, thiOutTime,
+      friInTime, friOutTime;
+
+  final now = new DateTime.now();
+
+  bool submitSt = true;
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(''),
+    return FocusWatcher(
+      child: Scaffold(
+        key: _globalScaffoldKey,
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context).translate('add_intern'), style: TextStyle(fontSize: 18)),
+          centerTitle: true,
+          brightness: Brightness.dark,
+          actions: [
+            TextButton(
+              onPressed: () {
+                if(submitSt){
+                  submitForm();
+                }
+              },
+              style: TextButton.styleFrom(
+                shape: CircleBorder(side: BorderSide(color: Colors.transparent)),
+                primary: Colors.white,
+              ),
+              child: Text(AppLocalizations.of(context).translate('save'), style: TextStyle(color: Colors.white, fontSize: 15)),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.white,
+        body: internFormBody(),
       ),
     );
   }
 
   Widget internFormBody(){
-    return Container();
+    return FadingEdgeScrollView.fromSingleChildScrollView(
+      child: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
+        controller: scrollController,
+        child: FadeInUp(
+          from: 10,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 40, 12, 12),
+            child: Column(
+              children: [
+
+                Center(child: SizedBox(width: 180, height: 180,child: AvatarPicker(imageURL: imageUrl, enabled: submitSt, onImageCaptured: (path){
+                  setState(() {
+                    imageUrl = path;
+                  });
+                }))),
+
+                Form(
+                  key: _formKey,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 30),
+                    width: MediaQuery.of(context).size.width,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+
+                        SizedBox(height: 25),
+
+                        AppTextField(
+                          isEnable: submitSt,
+                          labelText: AppLocalizations.of(context).translate('first_name'),
+                          inputAction: TextInputAction.next,
+                          textCapitalization: TextCapitalization.sentences,
+                          onValidate: (value){
+                            if (value.isEmpty) {
+                              return AppLocalizations.of(context).translate('first_name_empty_validate');
+                            }
+
+                            if (value.length < 3) {
+                              return AppLocalizations.of(context).translate('first_name_len_validate');
+                            }
+
+                            return null;
+                          },
+
+                          onChanged: (value){
+                            firstName = value;
+                          },
+                        ),
+
+                        AppTextField(
+                          isEnable: submitSt,
+                          labelText: AppLocalizations.of(context).translate('last_name'),
+                          inputAction: TextInputAction.next,
+                          textCapitalization: TextCapitalization.sentences,
+                          onValidate: (value){
+                            if (value.isEmpty) {
+                              return AppLocalizations.of(context).translate('last_name_empty_validate');
+                            }
+
+                            if (value.length < 3) {
+                              return AppLocalizations.of(context).translate('last_name_len_validate');
+                            }
+
+                            return null;
+                          },
+
+                          onChanged: (value){
+                            lastName = value;
+                          },
+                        ),
+
+                        AppTextField(
+                          isEnable: submitSt,
+                          labelText: AppLocalizations.of(context).translate('email'),
+                          textInputFormatter: [FilteringTextInputFormatter.deny(RegExp('[ ]'))],
+                          inputAction: TextInputAction.done,
+                          textInputType: TextInputType.emailAddress,
+                          onValidate: (value){
+
+                            Pattern pattern = '[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}';
+
+                            if (value.isEmpty) {
+                              return AppLocalizations.of(context).translate('email_empty_validate');
+                            }
+
+                            if (!RegExp(pattern).hasMatch(value)){
+                              return AppLocalizations.of(context).translate('email_validate');
+                            }
+
+                            return null;
+                          },
+
+                          onFieldSubmitted: (value){
+                            email = value;
+                            FocusScope.of(context).unfocus();
+                          },
+
+                          onChanged: (value){
+                            email = value;
+                          },
+                        ),
+
+                        SizedBox(height: 18),
+
+                        Container(
+                          width: MediaQuery.of(context).size.width - 90,
+                          child: DropdownButtonFormField(
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(30))),
+                              isDense: true,
+                              contentPadding: EdgeInsets.fromLTRB(22, 20, 22, 12),
+                              errorMaxLines: 1,
+                              errorStyle: TextStyle(fontSize: 12),
+                            ),
+                            items: Provider.of<CompaniesViewModel>(context, listen: false).companyList.map((UserModel model) {
+                              return DropdownMenuItem<String>(
+                                value: model.uID,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 3.0),
+                                  child: new Text(model.companyName, style: TextStyle(color: Colors.grey[700])),
+                                ),
+                              );
+                            }).toList(),
+                            dropdownColor: Colors.white,
+                            validator: (value) {
+                              if (value == null) {
+                                return AppLocalizations.of(context).translate('company_select_empty_validate');
+                              }
+                              return null;
+                            },
+                            hint: Padding(
+                              padding: const EdgeInsets.only(top: 3.0),
+                              child: Text(AppLocalizations.of(context).translate('select_company'), style: TextStyle(color: Colors.grey[500])),
+                            ),
+                            onChanged: submitSt ? (value) => setState(() => companyID = value) : null,
+                          ),
+                        ),
+
+                        SizedBox(height: 50),
+
+                        Center(child: Text(AppLocalizations.of(context).translate('schedules'), style: TextStyle(fontSize: 18 ,color: Colors.grey[600], fontWeight: FontWeight.bold))),
+
+                        SizedBox(height: 30),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Text(AppLocalizations.of(context).translate('sunday'), style: TextStyle(fontSize: 16 ,color: Colors.grey[600], fontWeight: FontWeight.normal)),
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TimePickerField(
+                                enabled: submitSt,
+                                onTimePicked: (time){
+                                  sunInTime = new DateTime(now.year, now.month, now.day, time.hour, time.minute);
+                                },
+                                hint: AppLocalizations.of(context).translate('clock_id'),
+                                helpText: '${AppLocalizations.of(context).translate('sunday')} ${AppLocalizations.of(context).translate('clock_id')} time',
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: TimePickerField(
+                                enabled: submitSt,
+                                onTimePicked: (time){
+                                  sunOutTime = new DateTime(now.year, now.month, now.day, time.hour, time.minute);
+                                },
+                                hint: AppLocalizations.of(context).translate('clock_out'),
+                                helpText: '${AppLocalizations.of(context).translate('sunday')} ${AppLocalizations.of(context).translate('clock_out')} time',
+                              ),
+                            ),
+
+                          ],
+                        ),
+
+                        SizedBox(height: 30),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Text(AppLocalizations.of(context).translate('monday'), style: TextStyle(fontSize: 16 ,color: Colors.grey[600], fontWeight: FontWeight.normal)),
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TimePickerField(
+                                enabled: submitSt,
+                                onTimePicked: (time){
+                                  monInTime = new DateTime(now.year, now.month, now.day, time.hour, time.minute);
+                                },
+                                hint: AppLocalizations.of(context).translate('clock_id'),
+                                helpText: '${AppLocalizations.of(context).translate('monday')} ${AppLocalizations.of(context).translate('clock_id')} time',
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: TimePickerField(
+                                enabled: submitSt,
+                                onTimePicked: (time){
+                                  monOutTime = new DateTime(now.year, now.month, now.day, time.hour, time.minute);
+                                },
+                                hint: AppLocalizations.of(context).translate('clock_out'),
+                                helpText: '${AppLocalizations.of(context).translate('monday')} ${AppLocalizations.of(context).translate('clock_out')} time',
+                              ),
+                            ),
+
+                          ],
+                        ),
+
+                        SizedBox(height: 30),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Text(AppLocalizations.of(context).translate('tuesday'), style: TextStyle(fontSize: 16 ,color: Colors.grey[600], fontWeight: FontWeight.normal)),
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TimePickerField(
+                                enabled: submitSt,
+                                onTimePicked: (time){
+                                  tusInTime = new DateTime(now.year, now.month, now.day, time.hour, time.minute);
+                                },
+                                hint: AppLocalizations.of(context).translate('clock_id'),
+                                helpText: '${AppLocalizations.of(context).translate('tuesday')} ${AppLocalizations.of(context).translate('clock_id')} time',
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: TimePickerField(
+                                enabled: submitSt,
+                                onTimePicked: (time){
+                                  tusOutTime = new DateTime(now.year, now.month, now.day, time.hour, time.minute);
+                                },
+                                hint: AppLocalizations.of(context).translate('clock_out'),
+                                helpText: '${AppLocalizations.of(context).translate('tuesday')} ${AppLocalizations.of(context).translate('clock_out')} time',
+                              ),
+                            ),
+
+                          ],
+                        ),
+
+                        SizedBox(height: 30),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Text(AppLocalizations.of(context).translate('wednesday'), style: TextStyle(fontSize: 16 ,color: Colors.grey[600], fontWeight: FontWeight.normal)),
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TimePickerField(
+                                enabled: submitSt,
+                                onTimePicked: (time){
+                                  wedInTime = new DateTime(now.year, now.month, now.day, time.hour, time.minute);
+                                },
+                                hint: AppLocalizations.of(context).translate('clock_id'),
+                                helpText: '${AppLocalizations.of(context).translate('wednesday')} ${AppLocalizations.of(context).translate('clock_id')} time',
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: TimePickerField(
+                                enabled: submitSt,
+                                onTimePicked: (time){
+                                  wedOutTime = new DateTime(now.year, now.month, now.day, time.hour, time.minute);
+                                },
+                                hint: AppLocalizations.of(context).translate('clock_out'),
+                                helpText: '${AppLocalizations.of(context).translate('wednesday')} ${AppLocalizations.of(context).translate('clock_out')} time',
+                              ),
+                            ),
+
+                          ],
+                        ),
+
+                        SizedBox(height: 30),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Text(AppLocalizations.of(context).translate('thursday'), style: TextStyle(fontSize: 16 ,color: Colors.grey[600], fontWeight: FontWeight.normal)),
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TimePickerField(
+                                enabled: submitSt,
+                                onTimePicked: (time){
+                                  thiInTime = new DateTime(now.year, now.month, now.day, time.hour, time.minute);
+                                },
+                                hint: AppLocalizations.of(context).translate('clock_id'),
+                                helpText: '${AppLocalizations.of(context).translate('thursday')} ${AppLocalizations.of(context).translate('clock_id')} time',
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: TimePickerField(
+                                enabled: submitSt,
+                                onTimePicked: (time){
+                                  thiOutTime = new DateTime(now.year, now.month, now.day, time.hour, time.minute);
+                                },
+                                hint: AppLocalizations.of(context).translate('clock_out'),
+                                helpText: '${AppLocalizations.of(context).translate('thursday')} ${AppLocalizations.of(context).translate('clock_out')} time',
+                              ),
+                            ),
+
+                          ],
+                        ),
+
+                        SizedBox(height: 30),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Text(AppLocalizations.of(context).translate('friday'), style: TextStyle(fontSize: 16 ,color: Colors.grey[600], fontWeight: FontWeight.normal)),
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TimePickerField(
+                                enabled: submitSt,
+                                onTimePicked: (time){
+                                  friInTime = new DateTime(now.year, now.month, now.day, time.hour, time.minute);
+                                },
+                                hint: AppLocalizations.of(context).translate('clock_id'),
+                                helpText: '${AppLocalizations.of(context).translate('friday')} ${AppLocalizations.of(context).translate('clock_id')} time',
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: TimePickerField(
+                                enabled: submitSt,
+                                onTimePicked: (time){
+                                  friOutTime = new DateTime(now.year, now.month, now.day, time.hour, time.minute);
+                                },
+                                hint: AppLocalizations.of(context).translate('clock_out'),
+                                helpText: '${AppLocalizations.of(context).translate('friday')} ${AppLocalizations.of(context).translate('clock_out')} time',
+                              ),
+                            ),
+
+                          ],
+                        ),
+
+                        SizedBox(height: 30),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Text(AppLocalizations.of(context).translate('saturday'), style: TextStyle(fontSize: 16 ,color: Colors.grey[600], fontWeight: FontWeight.normal)),
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TimePickerField(
+                                enabled: submitSt,
+                                onTimePicked: (time){
+                                  satInTime = new DateTime(now.year, now.month, now.day, time.hour, time.minute);
+                                },
+                                hint: AppLocalizations.of(context).translate('clock_id'),
+                                helpText: '${AppLocalizations.of(context).translate('saturday')} ${AppLocalizations.of(context).translate('clock_id')} time',
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: TimePickerField(
+                                enabled: submitSt,
+                                onTimePicked: (time){
+                                  satOutTime = new DateTime(now.year, now.month, now.day, time.hour, time.minute);
+                                },
+                                hint: AppLocalizations.of(context).translate('clock_out'),
+                                helpText: '${AppLocalizations.of(context).translate('saturday')} ${AppLocalizations.of(context).translate('clock_out')} time',
+                              ),
+                            ),
+
+                          ],
+                        ),
+
+                        SizedBox(height: 50),
+                        Center(child: Text(AppLocalizations.of(context).translate('long_tap_remove_time'), style: TextStyle(fontSize: 13 ,color: Colors.grey[400], fontWeight: FontWeight.normal))),
+                        SizedBox(height: 50),
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void submitForm() async{
+
+    FocusScope.of(context).unfocus();
+
+    if (_formKey.currentState.validate()) {
+
+      Future.delayed(Duration(milliseconds: 250), (){
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context){
+            return LoadingDialog();
+          },
+        );
+      });
+
+      setState(() {
+        submitSt = false;
+      });
+
+      try{
+
+        dynamic uploadResult;
+
+        if(imageUrl != null){
+          uploadResult =  await Provider.of<FirebaseStorage>(context, listen: false).uploadAvatar(imagePath: imageUrl);
+        }
+
+        dynamic result = await Provider.of<FirebaseAuthService>(context, listen: false).registerWithoutAuth(email: email.trim());
+
+        if (result is UserModel) {
+          result.imageURL = uploadResult != null && Uri.tryParse(uploadResult).isAbsolute ? uploadResult : null;
+          createProfile(result);
+        } else {
+          setState(() {
+            submitSt = true;
+          });
+
+          await Future.delayed(Duration(milliseconds: 1500), (){Navigator.pop(context);});
+          await Future.delayed(Duration(milliseconds: 800), (){Message.show(_globalScaffoldKey, result.toString());});
+        }
+      }catch(error){
+        if(!AppConfig.isPublished){
+          print('$error');
+        }
+
+        setState(() {
+          submitSt = true;
+        });
+
+        await Future.delayed(Duration(milliseconds: 1500), (){Navigator.pop(context);});
+        await Future.delayed(Duration(milliseconds: 800), (){Message.show(_globalScaffoldKey, AppLocalizations.of(context).translate('intern_add_fail'));});
+
+      }
+    }
+  }
+
+  void createProfile(UserModel model) async{
+
+    try{
+      String regCode = model.uID.toUpperCase().substring(0, 6);
+
+      Map<String, dynamic> schedules = {
+        'sat': { 'clock_in': satInTime, 'clock_out': satOutTime },
+        'sun': { 'clock_in': sunInTime, 'clock_out': sunOutTime },
+        'mon': { 'clock_in': monInTime, 'clock_out': monOutTime },
+        'tue': { 'clock_in': tusInTime, 'clock_out': tusOutTime },
+        'wed': { 'clock_in': wedInTime, 'clock_out': wedOutTime },
+        'thu': { 'clock_in': thiInTime, 'clock_out': thiOutTime },
+        'fri': { 'clock_in': friInTime, 'clock_out': friOutTime },
+      };
+
+      Map<String, dynamic> clocks = {
+        'sat': { 'clock_in': null, 'clock_out': null },
+        'sun': { 'clock_in': null, 'clock_out': null },
+        'mon': { 'clock_in': null, 'clock_out': null },
+        'tue': { 'clock_in': null, 'clock_out': null },
+        'wed': { 'clock_in': null, 'clock_out': null },
+        'thu': { 'clock_in': null, 'clock_out': null },
+        'fri': { 'clock_in': null, 'clock_out': null },
+      };
+
+      UserModel userModel = UserModel(
+        uID: model.uID,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        imageURL: model.imageURL != null ? model.imageURL : '',
+        companyID: companyID,
+        email: email.trim(),
+        platform: Platform.operatingSystem,
+        registererID: Provider.of<UserViewModel>(context, listen: false).uID,
+        createdAt: Timestamp.now(),
+        roleID: AppConfig.internUserRole.toDouble(),
+        tags: [firstName.trim().toLowerCase(), lastName.trim().toLowerCase(), '${firstName.trim().toLowerCase()} ${lastName.trim().toLowerCase()}' , email.trim().toLowerCase(), regCode],
+        schedules: schedules,
+        clocks: clocks,
+        regCode: regCode,
+        status: true,
+        verified: false,
+        hasPassword: false
+      );
+
+      await Provider.of<FirestoreService>(context, listen: false).createProfile(userModel: userModel);
+      await Provider.of<UserViewModel>(context, listen: false).sendEmail( message: 'Your registration code is: $regCode', email: userModel.email);
+      await Provider.of<UserViewModel>(context, listen: false).sendEmail( message: '${firstName.trim()} ${lastName.trim()} intern registration code is: $regCode', email: Provider.of<UserViewModel>(context, listen: false).email);
+      //Provider.of<CompaniesViewModel>(context, listen: false).addToList(model: userModel);
+
+      await Future.delayed(Duration(milliseconds: 1500), (){Navigator.pop(context);});
+      await Future.delayed(Duration(milliseconds: 800), (){Message.show(_globalScaffoldKey, AppLocalizations.of(context).translate('intern_add_success'));});
+      await Future.delayed(Duration(milliseconds: 1500), (){Navigator.pop(context);});
+
+    }catch(error){
+      if(!AppConfig.isPublished){
+        print('$error');
+      }
+
+      setState(() {
+        submitSt = true;
+      });
+
+      await Future.delayed(Duration(milliseconds: 1500), (){Navigator.pop(context);});
+      await Future.delayed(Duration(milliseconds: 800), (){Message.show(_globalScaffoldKey, AppLocalizations.of(context).translate('intern_add_fail'));});
+    }
   }
 }

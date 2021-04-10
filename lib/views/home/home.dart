@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import '../../views/intern_form/intern_form.dart';
 import '../../views/company_form/company_form.dart';
 import '../../view_models/user_view_model.dart';
 import '../../helpers/message.dart';
@@ -85,7 +86,7 @@ class _HomeState extends State<Home> {
           onPressed: () {
             switch (bottomSelectedIndex) {
               case 0:
-
+                AppNavigator.push(context: context, page: InternForm());
                 break;
               case 1:
                 AppNavigator.push(context: context, page: CompanyForm());

@@ -31,8 +31,8 @@ class _CompanyFormState extends State<CompanyForm> {
   final _globalScaffoldKey = GlobalKey<ScaffoldState>();
   ScrollController scrollController = ScrollController();
 
-  String companyName, employerFirstName, employerLastName, email, imageUrl;
-  bool companyNameSt = true, employerFirstNameSt = true, employerLastNameSt = true, emailSt = true, imageSt = true, submitSt = true;
+  String companyName, employerFirstName, employerLastName, email, imageUrl, employerEducation, employerCertification;
+  bool submitSt = true;
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +76,7 @@ class _CompanyFormState extends State<CompanyForm> {
             child: Column(
               children: [
 
-                Center(child: SizedBox(width: 180, height: 180,child: LogoPicker(imageURL: imageUrl, enabled: imageSt, onImageCaptured: (path){
+                Center(child: SizedBox(width: 180, height: 180,child: LogoPicker(imageURL: imageUrl, enabled: submitSt, onImageCaptured: (path){
                   setState(() {
                     imageUrl = path;
                   });
@@ -91,10 +91,10 @@ class _CompanyFormState extends State<CompanyForm> {
 
                       children: <Widget>[
 
-                        SizedBox(height: 40),
+                        SizedBox(height: 25),
 
                         AppTextField(
-                          isEnable: companyNameSt,
+                          isEnable: submitSt,
                           labelText: AppLocalizations.of(context).translate('company_name'),
                           inputAction: TextInputAction.next,
                           textCapitalization: TextCapitalization.sentences,
@@ -116,7 +116,7 @@ class _CompanyFormState extends State<CompanyForm> {
                         ),
 
                         AppTextField(
-                          isEnable: employerFirstNameSt,
+                          isEnable: submitSt,
                           labelText: AppLocalizations.of(context).translate('employer_first_name'),
                           inputAction: TextInputAction.next,
                           textCapitalization: TextCapitalization.sentences,
@@ -138,7 +138,7 @@ class _CompanyFormState extends State<CompanyForm> {
                         ),
 
                         AppTextField(
-                          isEnable: employerLastNameSt,
+                          isEnable: submitSt,
                           labelText: AppLocalizations.of(context).translate('employer_last_name'),
                           inputAction: TextInputAction.next,
                           textCapitalization: TextCapitalization.sentences,
@@ -160,7 +160,27 @@ class _CompanyFormState extends State<CompanyForm> {
                         ),
 
                         AppTextField(
-                          isEnable: emailSt,
+                          isEnable: submitSt,
+                          labelText: AppLocalizations.of(context).translate('employer_education'),
+                          inputAction: TextInputAction.next,
+                          textCapitalization: TextCapitalization.sentences,
+                          onChanged: (value){
+                            employerEducation = value;
+                          },
+                        ),
+
+                        AppTextField(
+                          isEnable: submitSt,
+                          labelText: AppLocalizations.of(context).translate('employer_certification'),
+                          inputAction: TextInputAction.next,
+                          textCapitalization: TextCapitalization.sentences,
+                          onChanged: (value){
+                            employerCertification = value;
+                          },
+                        ),
+
+                        AppTextField(
+                          isEnable: submitSt,
                           labelText: AppLocalizations.of(context).translate('employer_email'),
                           textInputFormatter: [FilteringTextInputFormatter.deny(RegExp('[ ]'))],
                           inputAction: TextInputAction.done,
@@ -223,11 +243,6 @@ class _CompanyFormState extends State<CompanyForm> {
       });
 
       setState(() {
-        companyNameSt = false;
-        employerFirstNameSt = false;
-        employerLastNameSt = false;
-        emailSt = false;
-        imageSt = false;
         submitSt = false;
       });
 
@@ -246,11 +261,6 @@ class _CompanyFormState extends State<CompanyForm> {
           createProfile(result);
         } else {
           setState(() {
-            companyNameSt = true;
-            employerFirstNameSt = true;
-            employerLastNameSt = true;
-            emailSt = true;
-            imageSt = true;
             submitSt = true;
           });
 
@@ -263,16 +273,11 @@ class _CompanyFormState extends State<CompanyForm> {
         }
 
         setState(() {
-          companyNameSt = true;
-          employerFirstNameSt = true;
-          employerLastNameSt = true;
-          emailSt = true;
-          imageSt = true;
           submitSt = true;
         });
 
         await Future.delayed(Duration(milliseconds: 1500), (){Navigator.pop(context);});
-        await Future.delayed(Duration(milliseconds: 800), (){Message.show(_globalScaffoldKey, error);});
+        await Future.delayed(Duration(milliseconds: 800), (){Message.show(_globalScaffoldKey, AppLocalizations.of(context).translate('company_add_fail'));});
 
       }
     }
@@ -288,6 +293,8 @@ class _CompanyFormState extends State<CompanyForm> {
         firstName: employerFirstName.trim(),
         lastName: employerLastName.trim(),
         logoURL: model.logoURL != null ? model.logoURL : '',
+        education: employerEducation.trim(),
+        certification: employerCertification.trim(),
         companyName: companyName.trim(),
         email: email.trim(),
         platform: Platform.operatingSystem,
@@ -316,16 +323,11 @@ class _CompanyFormState extends State<CompanyForm> {
       }
 
       setState(() {
-        companyNameSt = true;
-        employerFirstNameSt = true;
-        employerLastNameSt = true;
-        emailSt = true;
-        imageSt = true;
         submitSt = true;
       });
 
       await Future.delayed(Duration(milliseconds: 1500), (){Navigator.pop(context);});
-      await Future.delayed(Duration(milliseconds: 800), (){Message.show(_globalScaffoldKey, error);});
+      await Future.delayed(Duration(milliseconds: 800), (){Message.show(_globalScaffoldKey, AppLocalizations.of(context).translate('company_add_fail'));});
     }
   }
 }
