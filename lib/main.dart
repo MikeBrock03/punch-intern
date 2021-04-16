@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'services/firebase_storage.dart';
 import 'services/firestore_service.dart';
 import 'view_models/companies_view_model.dart';
+import 'view_models/interns_view_model.dart';
 import 'view_models/user_view_model.dart';
 import 'models/user_model.dart';
 import 'services/firebase_auth_service.dart';
@@ -25,6 +26,7 @@ Future <void> main() async{
             ChangeNotifierProvider<FontSizeController>(create: (BuildContext context) => FontSizeController()),
             ChangeNotifierProvider<UserViewModel>(create: (BuildContext context) => UserViewModel()),
             ChangeNotifierProvider<CompaniesViewModel>(create: (BuildContext context) => CompaniesViewModel()),
+            ChangeNotifierProvider<InternsViewModel>(create: (BuildContext context) => InternsViewModel()),
             Provider<FirebaseAuthService>(create: (BuildContext context) => FirebaseAuthService()),
             Provider<FirestoreService>(create: (BuildContext context) => FirestoreService()),
             Provider<FirebaseStorage>(create: (BuildContext context) => FirebaseStorage()),

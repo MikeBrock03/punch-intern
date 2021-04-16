@@ -477,17 +477,18 @@ class _InternFormState extends State<InternForm> {
 
       try{
 
-        dynamic uploadResult;
-
-        if(imageUrl != null){
-          uploadResult =  await Provider.of<FirebaseStorage>(context, listen: false).uploadAvatar(imagePath: imageUrl);
-        }
-
         dynamic result = await Provider.of<FirebaseAuthService>(context, listen: false).registerWithoutAuth(email: email.trim());
 
         if (result is UserModel) {
-          result.imageURL = uploadResult != null && Uri.tryParse(uploadResult).isAbsolute ? uploadResult : null;
-          createProfile(result);
+
+          if(imageUrl != null){
+            dynamic uploadResult =  await Provider.of<FirebaseStorage>(context, listen: false).uploadAvatar(imagePath: imageUrl, uID: result.uID);
+            result.imageURL = uploadResult != null && Uri.tryParse(uploadResult).isAbsolute ? uploadResult : null;
+            createProfile(result);
+          }else{
+            createProfile(result);
+          }
+
         } else {
           setState(() {
             submitSt = true;

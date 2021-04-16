@@ -40,6 +40,13 @@
   "logout": "Logout",
   "exit_from_account_description": "Are you sure to exit from your account?",
   "delete_image_alert": "Are you sure to delete this image?",
+  "delete_item_alert": "Are you sure to delete this item?",
+  "delete_company_alert": "Are you sure to delete this company?",
+  "delete_intern_alert": "Are you sure to delete this intern?",
+  "delete_company_success": "The company deleted successfully",
+  "delete_company_fail": "Unable to delete the company, try again later",
+  "delete_intern_success": "The intern deleted successfully",
+  "delete_intern_fail": "Unable to delete the intern, try again later",
   "companies": "Companies",
   "interns": "Interns",
   "interns_title": "It's a good day to have beans",
@@ -63,6 +70,7 @@
   "not_receive_code": "You didn't receive the code?",
   "send_code_again": "Send the code again",
   "please_wait": "Please wait",
+  "loading": "Loading",
   "connection_error_title": "Unable to connect to the server",
   "connection_error_description": "There is no internet connection, Please try again",
   "receive_error": "Unable to get data",
@@ -128,5 +136,8 @@
   "wednesday": "Wednesday",
   "thursday": "Thursday",
   "friday": "Friday",
-  "long_tap_remove_time": "Long tap on each field to remove the time"
+  "long_tap_remove_time": "Long tap on each field to remove the time",
+  "edit": "Edit",
+  "delete": "Delete",
+  "update": "Update"
 }

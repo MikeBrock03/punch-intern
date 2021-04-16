@@ -3,6 +3,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import '../../../../helpers/app_navigator.dart';
+import '../../../../views/company_detail/company_detail.dart';
 import '../../../../helpers/fading_edge_scrollview.dart';
 import '../../../../view_models/companies_view_model.dart';
 import '../../../../helpers/app_localizations.dart';
@@ -62,7 +64,7 @@ class _CompanyFragmentState extends State<CompanyFragment> with AutomaticKeepAli
                     tag: company.uID,
                     child: GestureDetector(
                       onTap: (){
-                        
+                        AppNavigator.push(context: context, page: CompanyDetail(company: company));
                       },
                       child: Container(
                         padding: EdgeInsets.all(8),
@@ -78,7 +80,7 @@ class _CompanyFragmentState extends State<CompanyFragment> with AutomaticKeepAli
                             ),
                           ],
                         ),
-                        child: company.logoURL != '' ? ClipRRect(
+                        child: company.logoURL != null && company.logoURL != '' ? ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: CachedNetworkImage(
                             placeholder:(context, url) => Container(color: Colors.grey[200]),
@@ -87,7 +89,7 @@ class _CompanyFragmentState extends State<CompanyFragment> with AutomaticKeepAli
                             height: double.infinity,
                             fit: BoxFit.fitHeight,
                           ),
-                        ) : ClipRRect(borderRadius: BorderRadius.circular(10), child: Container(color: Colors.grey[200], child: Center(child: Text(company.companyName, style: TextStyle(fontSize: 13, color: Colors.grey[500]),))))
+                        ) : ClipRRect(borderRadius: BorderRadius.circular(10), child: Container(color: Colors.grey[200], child: Center(child: Text(company.companyName, style: TextStyle(fontSize: 13, color: Colors.grey[500], decoration: TextDecoration.none)))))
                       ),
                     ),
                   );

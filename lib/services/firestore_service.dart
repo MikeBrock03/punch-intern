@@ -65,6 +65,35 @@ class FirestoreService {
     }
   }
 
+  Future<dynamic> updateProfile({ @required UserModel userModel }) async{
+    try{
+      await userCollection.doc(userModel.uID).update({
+        'logo_url' :      userModel.logoURL,
+        'company_name' :  userModel.companyName,
+        'first_name' :    userModel.firstName,
+        'last_name' :     userModel.lastName,
+        'education' :     userModel.education,
+        'certification' : userModel.certification,
+      });
+      return true;
+    }catch(error){
+      if(!AppConfig.isPublished){
+        return error;
+      }
+    }
+  }
+
+  Future<dynamic> deleteUser({ @required String uID }) async{
+    try{
+      await userCollection.doc(uID).delete();
+      return true;
+    }catch(error){
+      if(!AppConfig.isPublished){
+        return error;
+      }
+    }
+  }
+
   Future<dynamic> getCompanies({ String uID }) async{
     try{
       dynamic result;
@@ -80,6 +109,29 @@ class FirestoreService {
               }
             }
           );
+      return result;
+    }catch(error){
+      if(!AppConfig.isPublished){
+        return error;
+      }
+    }
+  }
+
+  Future<dynamic> getInternsByCompanyID({ String uID }) async{
+    try{
+      dynamic result;
+      await userCollection
+          .where("role_id", isEqualTo: AppConfig.internUserRole)
+          .where("company_id", isEqualTo: uID)
+          .where("status", isEqualTo: true)
+          .orderBy("created_at", descending: true)
+          .get()
+          .then((querySnapshot){
+        if(querySnapshot.docs.isNotEmpty){
+          result = querySnapshot.docs;
+        }
+      }
+      );
       return result;
     }catch(error){
       if(!AppConfig.isPublished){

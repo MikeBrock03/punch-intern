@@ -21,6 +21,12 @@ import '../../helpers/app_localizations.dart';
 import '../../helpers/message.dart';
 
 class CompanyForm extends StatefulWidget {
+
+  final UserModel userModel;
+  final Function() onFinish;
+
+  CompanyForm({ this.userModel, this.onFinish });
+
   @override
   _CompanyFormState createState() => _CompanyFormState();
 }
@@ -35,19 +41,37 @@ class _CompanyFormState extends State<CompanyForm> {
   bool submitSt = true;
 
   @override
+  void initState() {
+    super.initState();
+
+    if(widget.userModel != null){
+      companyName = widget.userModel.companyName;
+      employerFirstName = widget.userModel.firstName;
+      employerLastName = widget.userModel.lastName;
+      imageUrl = widget.userModel.logoURL != null && widget.userModel.logoURL != '' ? widget.userModel.logoURL : null;
+      employerEducation = widget.userModel.education;
+      employerCertification = widget.userModel.certification;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FocusWatcher(
       child: Scaffold(
         key: _globalScaffoldKey,
         appBar: AppBar(
-          title: Text(AppLocalizations.of(context).translate('add_company'), style: TextStyle(fontSize: 18)),
+          title: Text( widget.userModel != null ? AppLocalizations.of(context).translate('edit') + ' ' + widget.userModel.companyName : AppLocalizations.of(context).translate('add_company'), style: TextStyle(fontSize: 18)),
           centerTitle: true,
           brightness: Brightness.dark,
           actions: [
             TextButton(
               onPressed: () {
                 if(submitSt){
-                  submitForm();
+                  if(widget.userModel != null){
+                    updateProfile();
+                  }else{
+                    submitForm();
+                  }
                 }
               },
               style: TextButton.styleFrom(
@@ -98,6 +122,7 @@ class _CompanyFormState extends State<CompanyForm> {
                           labelText: AppLocalizations.of(context).translate('company_name'),
                           inputAction: TextInputAction.next,
                           textCapitalization: TextCapitalization.sentences,
+                          value: companyName,
                           onValidate: (value){
                             if (value.isEmpty) {
                               return AppLocalizations.of(context).translate('company_name_empty_validate');
@@ -120,6 +145,7 @@ class _CompanyFormState extends State<CompanyForm> {
                           labelText: AppLocalizations.of(context).translate('employer_first_name'),
                           inputAction: TextInputAction.next,
                           textCapitalization: TextCapitalization.sentences,
+                          value: employerFirstName,
                           onValidate: (value){
                             if (value.isEmpty) {
                               return AppLocalizations.of(context).translate('employer_first_name_empty_validate');
@@ -142,6 +168,7 @@ class _CompanyFormState extends State<CompanyForm> {
                           labelText: AppLocalizations.of(context).translate('employer_last_name'),
                           inputAction: TextInputAction.next,
                           textCapitalization: TextCapitalization.sentences,
+                          value: employerLastName,
                           onValidate: (value){
                             if (value.isEmpty) {
                               return AppLocalizations.of(context).translate('employer_last_name_empty_validate');
@@ -164,6 +191,7 @@ class _CompanyFormState extends State<CompanyForm> {
                           labelText: AppLocalizations.of(context).translate('employer_education'),
                           inputAction: TextInputAction.next,
                           textCapitalization: TextCapitalization.sentences,
+                          value: employerEducation,
                           onChanged: (value){
                             employerEducation = value;
                           },
@@ -174,12 +202,13 @@ class _CompanyFormState extends State<CompanyForm> {
                           labelText: AppLocalizations.of(context).translate('employer_certification'),
                           inputAction: TextInputAction.next,
                           textCapitalization: TextCapitalization.sentences,
+                          value: employerCertification,
                           onChanged: (value){
                             employerCertification = value;
                           },
                         ),
 
-                        AppTextField(
+                        widget.userModel == null ? AppTextField(
                           isEnable: submitSt,
                           labelText: AppLocalizations.of(context).translate('employer_email'),
                           textInputFormatter: [FilteringTextInputFormatter.deny(RegExp('[ ]'))],
@@ -208,7 +237,7 @@ class _CompanyFormState extends State<CompanyForm> {
                           onChanged: (value){
                             email = value;
                           },
-                        ),
+                        ) : Container(),
 
                         SizedBox(height: 20)
 
@@ -248,17 +277,18 @@ class _CompanyFormState extends State<CompanyForm> {
 
       try{
 
-        dynamic uploadResult;
-
-        if(imageUrl != null){
-          uploadResult =  await Provider.of<FirebaseStorage>(context, listen: false).uploadLogo(imagePath: imageUrl);
-        }
-
         dynamic result = await Provider.of<FirebaseAuthService>(context, listen: false).registerWithoutAuth(email: email.trim());
 
         if (result is UserModel) {
-          result.logoURL = uploadResult != null && Uri.tryParse(uploadResult).isAbsolute ? uploadResult : null;
-          createProfile(result);
+
+          if(imageUrl != null){
+            dynamic uploadResult =  await Provider.of<FirebaseStorage>(context, listen: false).uploadLogo(imagePath: imageUrl, uID: result.uID);
+            result.logoURL = uploadResult != null && Uri.tryParse(uploadResult).isAbsolute ? uploadResult : null;
+            createProfile(result);
+          }else{
+            createProfile(result);
+          }
+
         } else {
           setState(() {
             submitSt = true;
@@ -328,6 +358,74 @@ class _CompanyFormState extends State<CompanyForm> {
 
       await Future.delayed(Duration(milliseconds: 1500), (){Navigator.pop(context);});
       await Future.delayed(Duration(milliseconds: 800), (){Message.show(_globalScaffoldKey, AppLocalizations.of(context).translate('company_add_fail'));});
+    }
+  }
+
+  void updateProfile() async{
+
+    FocusScope.of(context).unfocus();
+
+    if (_formKey.currentState.validate()) {
+      Future.delayed(Duration(milliseconds: 250), () {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return LoadingDialog();
+          },
+        );
+      });
+
+      setState(() {
+        submitSt = false;
+      });
+
+      try{
+
+        UserModel model = widget.userModel;
+
+        if(imageUrl != null && !imageUrl.startsWith('http')){
+          dynamic uploadResult =  await Provider.of<FirebaseStorage>(context, listen: false).uploadLogo(imagePath: imageUrl, uID: model.uID);
+          model.logoURL = uploadResult != null && Uri.tryParse(uploadResult).isAbsolute ? uploadResult : null;
+        }else{
+          model.logoURL = imageUrl;
+        }
+        model.companyName = companyName.trim();
+        model.firstName = employerFirstName.trim();
+        model.lastName = employerLastName.trim();
+        model.education = employerEducation != null ? employerEducation.trim() : null;
+        model.certification = employerCertification != null ? employerCertification.trim() : null;
+
+        dynamic result = await Provider.of<FirestoreService>(context, listen: false).updateProfile(userModel: model);
+
+        if(result is bool && result){
+          Provider.of<CompaniesViewModel>(context, listen: false).updateList(model: model);
+
+          await Future.delayed(Duration(milliseconds: 1500), (){Navigator.pop(context);});
+          await Future.delayed(Duration(milliseconds: 800), (){Message.show(_globalScaffoldKey, AppLocalizations.of(context).translate('company_update_success'));});
+          await Future.delayed(Duration(milliseconds: 1500), (){Navigator.pop(context);});
+          widget.onFinish();
+        }else{
+          setState(() {
+            submitSt = true;
+          });
+          widget.onFinish();
+          await Future.delayed(Duration(milliseconds: 1500), (){Navigator.pop(context);});
+          await Future.delayed(Duration(milliseconds: 800), (){Message.show(_globalScaffoldKey, AppLocalizations.of(context).translate('company_update_fail'));});
+        }
+
+      }catch(error){
+        if(!AppConfig.isPublished){
+          print('$error');
+        }
+
+        setState(() {
+          submitSt = true;
+        });
+
+        await Future.delayed(Duration(milliseconds: 1500), (){Navigator.pop(context);});
+        await Future.delayed(Duration(milliseconds: 800), (){Message.show(_globalScaffoldKey, AppLocalizations.of(context).translate('company_update_fail'));});
+      }
     }
   }
 }

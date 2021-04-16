@@ -44,6 +44,23 @@ class CompaniesViewModel extends ChangeNotifier{
     }
   }
 
+  bool updateList({ UserModel model }) {
+    try{
+      _companyList.removeWhere((element) => element.uID == model.uID);
+      _companyList.add(model);
+      _companyList.sort((a, b) {
+        return b.createdAt.compareTo(a.createdAt);
+      });
+      notifyListeners();
+      return true;
+    }catch(error){
+      if(!AppConfig.isPublished){
+        print('Error: $error');
+      }
+      return false;
+    }
+  }
+
   bool removeFromList({ UserModel model }){
     try{
       _companyList.remove(model);

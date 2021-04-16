@@ -7,12 +7,12 @@ class FirebaseStorage {
 
   final firebaseStorage.Reference storageRef = firebaseStorage.FirebaseStorage.instance.ref();
 
-  Future<dynamic> uploadLogo({ String imagePath }) async{
+  Future<dynamic> uploadLogo({ String imagePath, String uID }) async{
 
     dynamic result;
 
     try {
-      var logoRef = storageRef.child('logos/${Path.basename(imagePath)}');
+      var logoRef = storageRef.child('logos/$uID${Path.extension(imagePath)}');
       await logoRef.putFile(File(imagePath)).whenComplete(() async {
         await logoRef.getDownloadURL().then((value) => {
           if(value != null){
@@ -26,12 +26,12 @@ class FirebaseStorage {
     }
   }
 
-  Future<dynamic> uploadAvatar({ String imagePath }) async{
+  Future<dynamic> uploadAvatar({ String imagePath, String uID  }) async{
 
     dynamic result;
 
     try {
-      var logoRef = storageRef.child('avatar/${Path.basename(imagePath)}');
+      var logoRef = storageRef.child('avatar/$uID${Path.extension(imagePath)}');
       await logoRef.putFile(File(imagePath)).whenComplete(() async {
         await logoRef.getDownloadURL().then((value) => {
           if(value != null){

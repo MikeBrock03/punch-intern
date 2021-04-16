@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
@@ -56,7 +57,7 @@ class _LogoPickerState extends State<LogoPicker> {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(15),
-          child: _imageFile != null ? Image.file(
+          child: _imageFile != null && _imageFile != '' ? _imageFile.startsWith('http') ? webImage() : Image.file(
             File(_imageFile),
             width: double.infinity,
             fit: BoxFit.cover,
@@ -70,6 +71,14 @@ class _LogoPickerState extends State<LogoPicker> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget webImage(){
+    return CachedNetworkImage(
+      placeholder:(context, url) => Container(color: Colors.grey[200]),
+      imageUrl: _imageFile,
+      fit: BoxFit.fitHeight,
     );
   }
 
