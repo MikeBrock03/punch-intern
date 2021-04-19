@@ -139,5 +139,22 @@
   "long_tap_remove_time": "Long tap on each field to remove the time",
   "edit": "Edit",
   "delete": "Delete",
-  "update": "Update"
+  "update": "Update",
+  "what_to_view": "What would you like to view?",
+  "clock_in_out": "Clock In Clock Out",
+  "contact_info": "Contact Info",
+  "or": "OR",
+  "work_schedule": "Work Schedule",
+  "clocked_in_at": "Clocked in at",
+  "clocked_out_at": "Clocked out at",
+  "address": "Address",
+  "is_at": "is at",
+  "contact": "Contact",
+  "update_information": "Update information",
+  "today": "Today",
+  "no_address": "Address is not set",
+  "not_set": "Not set",
+  "phone_number": "Phone number",
+  "contact_update_success": "Contact info updated successfully",
+  "contact_update_fail": "Unable to update contact info, Please try again later"
 }

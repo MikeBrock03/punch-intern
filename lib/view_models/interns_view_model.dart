@@ -28,6 +28,23 @@ class InternsViewModel extends ChangeNotifier{
     }
   }
 
+  bool updateList({ UserModel model }) {
+    try{
+      _internList.removeWhere((element) => element.uID == model.uID);
+      _internList.add(model);
+      _internList.sort((a, b) {
+        return b.createdAt.compareTo(a.createdAt);
+      });
+      notifyListeners();
+      return true;
+    }catch(error){
+      if(!AppConfig.isPublished){
+        print('Error: $error');
+      }
+      return false;
+    }
+  }
+
   bool removeFromList({ UserModel model }){
     try{
       _internList.remove(model);

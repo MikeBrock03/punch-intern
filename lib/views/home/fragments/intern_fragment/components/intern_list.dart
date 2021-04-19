@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../../../../../helpers/app_navigator.dart';
+import '../../../../../views/intern_view_select/intern_view_select.dart';
 import '../../../../../helpers/app_localizations.dart';
 import '../../../../../helpers/fading_edge_scrollview.dart';
 import '../../../../../models/user_model.dart';
@@ -128,7 +130,7 @@ class _InternListState extends State<InternList> {
                             tag: intern.uID,
                             child: GestureDetector(
                               onTap: (){
-
+                                AppNavigator.push(context: context, page: InternViewSelect(intern: intern));
                               },
                               child: Stack(
                                 children: [
@@ -146,7 +148,7 @@ class _InternListState extends State<InternList> {
                                           ),
                                         ],
                                       ),
-                                      child: intern.imageURL != '' ? ClipRRect(
+                                      child: intern.imageURL != null && intern.imageURL != '' ? ClipRRect(
                                         borderRadius: BorderRadius.circular(600),
                                         child: CachedNetworkImage(
                                           placeholder:(context, url) => Container(color: Colors.grey[200]),
@@ -155,7 +157,7 @@ class _InternListState extends State<InternList> {
                                           height: double.infinity,
                                           fit: BoxFit.fitHeight,
                                         ),
-                                      ) : ClipRRect(borderRadius: BorderRadius.circular(600), child: Container(color: Colors.grey[200], child: Center(child: Text(intern.firstName, style: TextStyle(fontSize: 13, color: Colors.grey[500]),))))
+                                      ) : ClipRRect(borderRadius: BorderRadius.circular(600), child: Container(color: Colors.grey[200], child: Center(child: Text(intern.firstName, style: TextStyle(fontSize: 13, color: Colors.grey[500], decoration: TextDecoration.none)))))
                                   ),
 
                                   Positioned(
@@ -201,7 +203,7 @@ class _InternListState extends State<InternList> {
                             tag: intern.uID,
                             child: GestureDetector(
                               onTap: (){
-
+                                AppNavigator.push(context: context, page: InternViewSelect(intern: intern));
                               },
                               child: Stack(
                                 children: [
@@ -219,7 +221,7 @@ class _InternListState extends State<InternList> {
                                           ),
                                         ],
                                       ),
-                                      child: intern.imageURL != '' ? ClipRRect(
+                                      child: intern.imageURL != null && intern.imageURL != '' ? ClipRRect(
                                         borderRadius: BorderRadius.circular(600),
                                         child: CachedNetworkImage(
                                           placeholder:(context, url) => Container(color: Colors.grey[200]),
@@ -228,7 +230,7 @@ class _InternListState extends State<InternList> {
                                           height: double.infinity,
                                           fit: BoxFit.fitHeight,
                                         ),
-                                      ) : ClipRRect(borderRadius: BorderRadius.circular(600), child: Container(color: Colors.grey[200], child: Center(child: Text(intern.firstName, style: TextStyle(fontSize: 13, color: Colors.grey[500]),))))
+                                      ) : ClipRRect(borderRadius: BorderRadius.circular(600), child: Container(color: Colors.grey[200], child: Center(child: Text(intern.firstName, style: TextStyle(fontSize: 13, color: Colors.grey[500], decoration: TextDecoration.none)))))
                                   ),
 
                                   Positioned(

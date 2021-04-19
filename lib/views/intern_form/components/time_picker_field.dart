@@ -6,9 +6,10 @@ class TimePickerField extends StatefulWidget {
   final Function(TimeOfDay timeOfDay) onTimePicked;
   final String hint;
   final String helpText;
+  final DateTime value;
   final bool enabled;
 
-  TimePickerField({ this.onTimePicked, this.hint, this.helpText, this.enabled });
+  TimePickerField({ this.onTimePicked, this.hint, this.helpText, this.value, this.enabled });
 
   @override
   _TimePickerFieldState createState() => _TimePickerFieldState();
@@ -19,7 +20,17 @@ class _TimePickerFieldState extends State<TimePickerField> {
   String selectedTime;
 
   @override
+  void initState() {
+    super.initState();
+
+    if(widget.value != null){
+      selectedTime = '${widget.hint}: ${ widget.value.hour.toString().padLeft(2, '0')}:${ widget.value.minute.toString().padLeft(2, '0')}';
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+
     return GestureDetector(
       onTap: () async{
         if(widget.enabled){

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 class AppTextArea extends StatefulWidget {
 
+  final bool isEnable;
   final String labelText;
   final String value;
   final int maxLine;
@@ -13,8 +14,9 @@ class AppTextArea extends StatefulWidget {
   final TextInputType textInputType;
   final bool isPassword;
   final TextDirection textDirection;
+  final TextCapitalization textCapitalization;
 
-  AppTextArea({ this.maxLine, this.inputAction , this.onFieldSubmitted, this.onValidate, @required this.labelText, this.textInputType, this.isPassword, this.textDirection, this.value, this.onChanged});
+  AppTextArea({ this.maxLine, this.inputAction , this.isEnable, this.textCapitalization, this.onFieldSubmitted, this.onValidate, @required this.labelText, this.textInputType, this.isPassword, this.textDirection, this.value, this.onChanged});
 
   @override
   _AppTextAreaState createState() => _AppTextAreaState();
@@ -24,7 +26,6 @@ class _AppTextAreaState extends State<AppTextArea> {
 
   TextEditingController controller;
   bool isEmpty;
-  bool isEnable = true;
 
   @override
   void initState() {
@@ -52,17 +53,18 @@ class _AppTextAreaState extends State<AppTextArea> {
       margin: EdgeInsets.only(top: 15),
       padding: EdgeInsets.all(3),
       child: Directionality(
-        textDirection: widget.textDirection != null ? widget.textDirection : TextDirection.rtl,
+        textDirection: widget.textDirection != null ? widget.textDirection : TextDirection.ltr,
         child: TextFormField(
           controller: controller,
-          enabled: isEnable,
+          enabled: widget.isEnable != null ? widget.isEnable : true,
           cursorColor: AppColors.primaryColor,
-          style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+          style: TextStyle(fontSize: 17, color: Colors.grey[700]),
           maxLines: widget.maxLine != null ? widget.maxLine : 5,
           textInputAction: widget.inputAction != null ? widget.inputAction : TextInputAction.next,
           autofocus: false,
           keyboardType: widget.textInputType != null ? widget.textInputType : TextInputType.multiline,
           obscureText: widget.isPassword != null ? widget.isPassword : false,
+          textCapitalization: widget.textCapitalization != null ? widget.textCapitalization : TextCapitalization.none,
           onFieldSubmitted: (term){
             widget.onFieldSubmitted != null ? widget.onFieldSubmitted(term) : FocusScope.of(context).nextFocus();
           },
@@ -76,11 +78,11 @@ class _AppTextAreaState extends State<AppTextArea> {
           },
           decoration: InputDecoration(
 
-            contentPadding: EdgeInsets.fromLTRB(0, 30, 20, 0),
+            contentPadding: EdgeInsets.fromLTRB(20, 30, 0, 0),
             labelText: widget.labelText,
-            labelStyle: TextStyle(color: Colors.grey[500], fontSize: 12),
+            labelStyle: TextStyle(color: Colors.grey[500], fontSize: 15),
             errorMaxLines: 1,
-            errorStyle: TextStyle(fontSize: 11),
+            errorStyle: TextStyle(fontSize: 12),
             border: OutlineInputBorder(
                 borderSide:  BorderSide(color: AppColors.primaryColor, width: 1.0),
                 borderRadius: BorderRadius.all(Radius.circular(30))

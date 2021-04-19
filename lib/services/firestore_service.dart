@@ -83,6 +83,49 @@ class FirestoreService {
     }
   }
 
+  Future<dynamic> updateInternProfile({ @required UserModel userModel }) async{
+    try{
+      await userCollection.doc(userModel.uID).update({
+        'image_url' :      userModel.imageURL,
+        'first_name' :    userModel.firstName,
+        'last_name' :     userModel.lastName,
+        'company_id' :     userModel.companyID,
+        'schedules' : userModel.schedules,
+      });
+      return true;
+    }catch(error){
+      if(!AppConfig.isPublished){
+        return error;
+      }
+    }
+  }
+
+  Future<dynamic> updateContactInfo({ @required UserModel userModel, bool isIntern }) async{
+    try{
+
+      var data;
+
+      if(isIntern){
+        data = {
+          'mobile' :     userModel.mobile,
+          'address' :    userModel.address,
+        };
+      }else{
+        data = {
+          'tel' :        userModel.tel,
+          'address' :    userModel.address,
+        };
+      }
+
+      await userCollection.doc(userModel.uID).update(data);
+      return true;
+    }catch(error){
+      if(!AppConfig.isPublished){
+        return error;
+      }
+    }
+  }
+
   Future<dynamic> deleteUser({ @required String uID }) async{
     try{
       await userCollection.doc(uID).delete();

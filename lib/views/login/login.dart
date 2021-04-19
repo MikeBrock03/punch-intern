@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:provider/provider.dart';
+import '../../view_models/companies_view_model.dart';
 import '../../database/storage.dart';
 import '../../models/user_model.dart';
 import '../../services/firestore_service.dart';
@@ -271,6 +272,7 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
             if(result.roleID == AppConfig.adminUserRole.toDouble()){
               Provider.of<UserViewModel>(context, listen: false).setUserModel(result);
               if (result.verified) {
+                await Provider.of<CompaniesViewModel>(context, listen: false).fetchData(uID: Provider.of<UserViewModel>(context, listen: false).uID);
                 AppNavigator.pushReplace(context: context, page: Home());
               } else {
                 AppNavigator.pushReplace(context: context, page: Verify());

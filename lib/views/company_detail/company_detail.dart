@@ -3,6 +3,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:punch_app/views/contact_info/contact_info.dart';
+import '../../views/intern_view_select/intern_view_select.dart';
 import '../../helpers/loading_dialog.dart';
 import '../../view_models/companies_view_model.dart';
 import '../../helpers/message.dart';
@@ -125,7 +127,7 @@ class _CompanyDetailState extends State<CompanyDetail> {
                 tag: widget.company.uID,
                 child: GestureDetector(
                   onTap: (){
-                    //AppNavigator.push(context: context, page: CompanyDetail(company: company));
+                    AppNavigator.push(context: context, page: ContactInfo(userModel: widget.company, isIntern: false));
                   },
                   child: Container(
                       width: 95,
@@ -205,7 +207,7 @@ class _CompanyDetailState extends State<CompanyDetail> {
                                     tag: intern.uID,
                                     child: GestureDetector(
                                       onTap: (){
-
+                                        AppNavigator.push(context: context, page: InternViewSelect(intern: intern));
                                       },
                                       child: Container(
                                           padding: EdgeInsets.all(8),
@@ -221,7 +223,7 @@ class _CompanyDetailState extends State<CompanyDetail> {
                                               ),
                                             ],
                                           ),
-                                          child: intern.imageURL != '' ? ClipRRect(
+                                          child: intern.imageURL != null && intern.imageURL != '' ? ClipRRect(
                                             borderRadius: BorderRadius.circular(600),
                                             child: CachedNetworkImage(
                                               placeholder:(context, url) => Container(color: Colors.grey[200]),
@@ -230,7 +232,7 @@ class _CompanyDetailState extends State<CompanyDetail> {
                                               height: double.infinity,
                                               fit: BoxFit.fitHeight,
                                             ),
-                                          ) : ClipRRect(borderRadius: BorderRadius.circular(600), child: Container(color: Colors.grey[200], child: Center(child: Text(intern.firstName, style: TextStyle(fontSize: 13, color: Colors.grey[500]),))))
+                                          ) : ClipRRect(borderRadius: BorderRadius.circular(600), child: Container(color: Colors.grey[200], child: Center(child: Text(intern.firstName, style: TextStyle(fontSize: 13, color: Colors.grey[500], decoration: TextDecoration.none)))))
                                       ),
                                     ),
                                   );

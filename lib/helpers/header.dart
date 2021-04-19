@@ -37,11 +37,11 @@ class Header extends StatelessWidget {
           ),
 
           Positioned(
-            top: 90,
+            top: 100,
             child: FadeInDown(
               from: 30,
               child: Container(
-                width: MediaQuery.of(context).size.width / 3 - 10,
+                width: MediaQuery.of(context).size.width / 3 - 30,
                 child: Image.asset('assets/images/app_icon.png'),
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(30),
