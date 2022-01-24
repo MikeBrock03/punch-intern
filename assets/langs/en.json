@@ -162,7 +162,7 @@
   "set_password_fail": "Unable to set password, Please try again later",
   "not_in_time": "You are not in working schedule",
   "clock_in_or_out": "Clock In/Out",
-  "good_to_checked_in": "It's a good day to be checked in",
+  "good_to_checked_in": "It's a good day to be checked in.",
   "tap_to_punch": "Tap here to punch in",
   "tap_to_punch_out": "Tap here to punch out",
   "no_company_linked": "There is no company linked to your account",
