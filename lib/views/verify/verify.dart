@@ -1,12 +1,13 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import '../../constants/app_colors.dart';
+import 'package:punch_app/constants/app_colors.dart';
+import 'fragments/success_fragment.dart';
+import 'fragments/reg_code_fragment.dart';
 import '../../helpers/app_localizations.dart';
 import '../../helpers/app_navigator.dart';
 import '../../views/welcome/welcome.dart';
-import 'fragments/success_fragment.dart';
-import 'fragments/reg_code_fragment.dart';
+import '../../views/verify/fragments/password_fragment.dart';
 
 class Verify extends StatefulWidget {
   @override
@@ -14,9 +15,8 @@ class Verify extends StatefulWidget {
 }
 
 class _VerifyState extends State<Verify> {
-
   final _globalScaffoldKey = GlobalKey<ScaffoldState>();
-  var _regCodePage, _successPage;
+  var _regCodePage, _passwordPage, _successPage;
   static const _kDuration = const Duration(milliseconds: 300);
   static const _kCurve = Curves.ease;
 
@@ -29,19 +29,30 @@ class _VerifyState extends State<Verify> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        AppNavigator.pushReplace(context: context, page: Welcome(verified: false));
+        AppNavigator.pushReplace(
+            context: context, page: Welcome(verified: false));
         return true;
       },
       child: Scaffold(
         key: _globalScaffoldKey,
         backgroundColor: Colors.white,
         appBar: AppBar(
+          iconTheme: IconThemeData(color: AppColors.primaryColor),
+          backgroundColor: Colors.white,
+          shadowColor: Colors.white,
+          elevation: 0,
           centerTitle: true,
           brightness: Brightness.dark,
-          title: Text(AppLocalizations.of(context).translate('account_verification'), style: TextStyle(fontSize: 17)),
+          title: Text(
+              AppLocalizations.of(context).translate('account_verification'),
+              style: TextStyle(fontSize: 17, color: AppColors.primaryColor)),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () => AppNavigator.pushReplace(context: context, page: Welcome(verified: false)),
+            icon: Icon(
+              Icons.arrow_back,
+              color: AppColors.primaryColor,
+            ),
+            onPressed: () => AppNavigator.pushReplace(
+                context: context, page: Welcome(verified: false)),
           ),
         ),
         body: buildPageView(),
@@ -49,61 +60,53 @@ class _VerifyState extends State<Verify> {
     );
   }
 
-
   Widget buildPageView() {
     return Stack(
       children: [
         PageView.builder(
           itemBuilder: (context, index) {
             if (index == 0) return this.regCodeInit();
-            if (index == 1) return this.successInit();
+            if (index == 1) return this.passwordInit();
+            if (index == 2) return this.successInit();
             return null;
           },
           physics: NeverScrollableScrollPhysics(),
           controller: pageController,
-          itemCount: 2,
+          itemCount: 3,
           onPageChanged: (index) {
-            //pageChanged(index);
             FocusScope.of(context).requestFocus(new FocusNode());
           },
         ),
-
-        // check if the keyboard is appear then hide the page indicator
-        MediaQuery.of(context).viewInsets.bottom == 0 ? Positioned(
-            bottom: 10.0,
-            left: 0.0,
-            right: 0.0,
-            child: new Container(
-              padding: const EdgeInsets.all(20.0),
-              child: new Center(
-                child: new DotsIndicator(
-                  controller: pageController,
-                  itemCount: 2,
-                  color: AppColors.primaryColor,
-                  onPageSelected: (int page) {
-                    pageController.animateToPage(
-                      page,
-                      duration: _kDuration,
-                      curve: _kCurve,
-                    );
-                  },
-                ),
-              ),
-            )
-        ) : Container()
       ],
     );
   }
 
-  Widget regCodeInit(){
-    if(this._regCodePage == null) this._regCodePage = RegCodeFragment(globalScaffoldKey: _globalScaffoldKey, onFinish: (){
-      pageController.animateToPage(1, duration: Duration(milliseconds: 500), curve: Curves.ease);
-    });
+  Widget regCodeInit() {
+    if (this._regCodePage == null)
+      this._regCodePage = RegCodeFragment(
+          globalScaffoldKey: _globalScaffoldKey,
+          onFinish: () {
+            pageController.animateToPage(1,
+                duration: Duration(milliseconds: 500), curve: Curves.ease);
+          });
     return this._regCodePage;
   }
 
-  Widget successInit(){
-    if(this._successPage == null) this._successPage = SuccessFragment(globalScaffoldKey: _globalScaffoldKey);
+  Widget passwordInit() {
+    if (this._passwordPage == null)
+      this._passwordPage = PasswordFragment(
+          globalScaffoldKey: _globalScaffoldKey,
+          onFinish: () {
+            pageController.animateToPage(2,
+                duration: Duration(milliseconds: 500), curve: Curves.ease);
+          });
+    return this._passwordPage;
+  }
+
+  Widget successInit() {
+    if (this._successPage == null)
+      this._successPage =
+          SuccessFragment(globalScaffoldKey: _globalScaffoldKey);
     return this._successPage;
   }
 }
@@ -124,16 +127,17 @@ class DotsIndicator extends AnimatedWidget {
   static const double _kDotSize = 12.0;
   static const double _kDotSpacing = 25.0;
   Widget _buildDot(int index) {
-
     double selectedness = Curves.easeOut.transform(
-      max(0.0, 1.0 - ((controller.page ?? controller.initialPage) - index).abs()),
+      max(0.0,
+          1.0 - ((controller.page ?? controller.initialPage) - index).abs()),
     );
 
     return new Container(
       width: _kDotSpacing,
       child: new Center(
         child: new Material(
-          color: Color.fromRGBO(color.red, color.green, color.blue, max(selectedness, 0.3)),
+          color: Color.fromRGBO(
+              color.red, color.green, color.blue, max(selectedness, 0.3)),
           type: MaterialType.circle,
           child: new Container(
             width: _kDotSize,
@@ -151,4 +155,3 @@ class DotsIndicator extends AnimatedWidget {
     );
   }
 }
-

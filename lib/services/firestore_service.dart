@@ -1,6 +1,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import '../models/clock_field_model.dart';
 import '../config/app_config.dart';
 import '../models/user_model.dart';
 
@@ -27,6 +28,7 @@ class FirestoreService {
             uID:          uID,
             firstName:    document.data()['first_name'],
             lastName:     document.data()['last_name'],
+            companyID:    document.data()['company_id'],
             email:        document.data()['email'],
             tel:          document.data()['tel'],
             mobile:       document.data()['mobile'],
@@ -36,6 +38,8 @@ class FirestoreService {
             regCode:      document.data()['reg_code'],
             createdAt:    document.data()['created_at'],
             imageURL:     document.data()['image_url'],
+            schedules:    document.data()['schedules'],
+            clocks:       document.data()['clocks'],
             roleID:       document.data()['role_id'],
             tags:         document.data()['tags'],
             status:       document.data()['status'],
@@ -52,10 +56,102 @@ class FirestoreService {
     }
   }
 
+  Future<dynamic> getCompanyData({ @required String uID }) async{
+    try{
+      dynamic result;
+      await userCollection.doc(uID).get().then((document){
+        if(document.data().isNotEmpty){
+          result = UserModel(
+              uID:          uID,
+              firstName:    document.data()['first_name'],
+              lastName:     document.data()['last_name'],
+              companyName:  document.data()['company_name'],
+              email:        document.data()['email'],
+              tel:          document.data()['tel'],
+              mobile:       document.data()['mobile'],
+              address:      document.data()['address'],
+              platform:     document.data()['platform'],
+              registererID: document.data()['registerer_id'],
+              regCode:      document.data()['reg_code'],
+              createdAt:    document.data()['created_at'],
+              logoURL:      document.data()['logo_url'],
+              roleID:       document.data()['role_id'],
+              tags:         document.data()['tags'],
+              status:       document.data()['status'],
+              verified:     document.data()['verified'],
+              hasPassword:  document.data()['has_password']
+          );
+        }
+      });
+      return result;
+    }catch(error){
+      if(!AppConfig.isPublished){
+        return error;
+      }
+    }
+  }
+
+  Future<dynamic> getUserDataByRegisterCode({ @required String regCode }) async{
+    try{
+
+      dynamic result;
+      await userCollection
+          .where("reg_code", isEqualTo: regCode)
+          .where("role_id",  isEqualTo: AppConfig.internUserRole)
+          .where("status",   isEqualTo: true)
+          .where("verified", isEqualTo: false)
+          .get()
+          .then((querySnapshot) async{
+            if(querySnapshot.docs.isNotEmpty){
+
+              var document = querySnapshot.docs[0];
+
+              await userCollection.doc(document.data()['company_id']).get().then((companyDoc){
+
+                    if(companyDoc.data().isNotEmpty){
+
+                      result = UserModel(
+                          uID:          document.id,
+                          firstName:    document.data()['first_name'],
+                          lastName:     document.data()['last_name'],
+                          email:        document.data()['email'],
+                          tel:          document.data()['tel'],
+                          mobile:       document.data()['mobile'],
+                          address:      document.data()['address'],
+                          platform:     document.data()['platform'],
+                          registererID: document.data()['registerer_id'],
+                          regCode:      document.data()['reg_code'],
+                          createdAt:    document.data()['created_at'],
+                          imageURL:     document.data()['image_url'],
+                          schedules:    document.data()['schedules'],
+                          clocks:       document.data()['clocks'],
+                          roleID:       document.data()['role_id'],
+                          tags:         document.data()['tags'],
+                          status:       document.data()['status'],
+                          verified:     document.data()['verified'],
+                          hasPassword:  document.data()['has_password'],
+                          companyID:    companyDoc.id,
+                          companyName:  companyDoc.data()['company_name'],
+                          logoURL:      companyDoc.data()['logo_url'],
+                      );
+                    }
+                  });
+            }
+          }
+      );
+      return result;
+    }catch(error){
+      if(!AppConfig.isPublished){
+        return error;
+      }
+    }
+  }
+
   Future<dynamic> updateVerified({ @required String uID }) async{
     try{
       await userCollection.doc(uID).update({
-        'verified' : true
+        'verified' : true,
+        'has_password' : true
       });
       return true;
     }catch(error){
@@ -89,8 +185,9 @@ class FirestoreService {
         'image_url' :      userModel.imageURL,
         'first_name' :    userModel.firstName,
         'last_name' :     userModel.lastName,
-        'company_id' :     userModel.companyID,
-        'schedules' : userModel.schedules,
+        'mobile' :        userModel.mobile,
+        //'company_id' :     userModel.companyID,
+        //'schedules' : userModel.schedules,
       });
       return true;
     }catch(error){
@@ -201,6 +298,92 @@ class FirestoreService {
         print('Error: $error');
       }
       return null;
+    }
+  }
+
+  Future<dynamic> updateClocks({ @required String uID, @required String type, @required String day, @required String location, @required String dateOfToday }) async{
+
+    try{
+
+      var data;
+
+      if(type == 'clock_in'){
+        data = {
+          'clocks.$day.clock_in'  : Timestamp.now(),
+          'clocks.$day.clock_out' : null,
+          //'clocks.$day.location'  : location,
+        };
+      }else{
+        data = {
+          'clocks.$day.clock_out' : Timestamp.now(),
+        };
+      }
+
+      await userCollection.doc(uID).update(data).then((_) async {
+
+        await userCollection.doc(uID).collection('clock_history')
+          .doc(dateOfToday)
+          .get()
+          .then((document) async{
+
+            List<ClockFieldModel> clockModelList = [];
+
+            if(document.data() != null && document.data().isNotEmpty){
+
+              if(type == 'clock_in'){
+                if(document.data()['clocks'] != null){
+                  clockModelList = await document.data()['clocks'].map<ClockFieldModel>((model) => ClockFieldModel.fromJson(model)).toList();
+                  clockModelList.add(
+                      ClockFieldModel(
+                          historyClockIn:  Timestamp.now(),
+                          location:        location
+                      )
+                  );
+                  await userCollection.doc(uID).collection('clock_history').doc(dateOfToday).update({
+                    'clocks': clockModelList.map((e) => e.toMapForFirebaseHistory()).toList(),
+                  });
+                }else{
+                  return false;
+                }
+              }else{
+                if(document.data()['clocks'] != null){
+                  clockModelList = await document.data()['clocks'].map<ClockFieldModel>((model) => ClockFieldModel.fromJson(model)).toList();
+                  clockModelList[clockModelList.length - 1].historyClockOut = Timestamp.now();
+                  await userCollection.doc(uID).collection('clock_history').doc(dateOfToday).update({
+                    'clocks': clockModelList.map((e) => e.toMapForFirebaseHistory()).toList(),
+                  });
+                }else{
+                  return false;
+                }
+              }
+            }else{
+              if(type == 'clock_in'){
+                clockModelList.add(
+                  ClockFieldModel(
+                      historyClockIn:  Timestamp.now(),
+                      location:        location
+                  )
+                );
+                await userCollection.doc(uID).collection('clock_history').doc(dateOfToday).set({
+                  'clocks': clockModelList.map((e) => e.toMapForFirebaseHistory()).toList(),
+                  'date': Timestamp.now()
+                });
+              }else{
+                clockModelList.add(ClockFieldModel(historyClockOut: Timestamp.now()));
+                await userCollection.doc(uID).collection('clock_history').doc(dateOfToday).update({
+                  'clocks': clockModelList.map((e) => e.toMapForFirebaseHistory()).toList(),
+                });
+              }
+            }
+          });
+      });
+
+      return true;
+    }catch(error){
+      if(!AppConfig.isPublished){
+        print('Error: $error');
+      }
+      return error;
     }
   }
 }

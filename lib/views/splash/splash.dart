@@ -3,7 +3,8 @@ import 'package:animate_do/animate_do.dart';
 import 'package:clippy_flutter/clippy_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../view_models/companies_view_model.dart';
+import '../../view_models/interns_view_model.dart';
+import '../../view_models/company_view_model.dart';
 import '../../services/firebase_auth_service.dart';
 import '../../helpers/app_localizations.dart';
 import '../../views/error/error.dart';
@@ -52,12 +53,13 @@ class _SplashState extends State<Splash> {
             // set user data
             dynamic result = await Provider.of<FirestoreService>(context, listen: false).getUserData(uID: user.uID);
             if (result is UserModel) {
-              if (result.status) {
-
-                if(result.roleID == AppConfig.adminUserRole.toDouble()){
+              dynamic resultCompany = await Provider.of<FirestoreService>(context, listen: false).getCompanyData(uID: result.companyID);
+              if (result.status && resultCompany is UserModel) {
+                Provider.of<CompanyViewModel>(context, listen: false).setUserModel(resultCompany);
+                if(result.roleID == AppConfig.internUserRole.toDouble()){
                   Provider.of<UserViewModel>(context, listen: false).setUserModel(result);
                   if (result.verified) {
-                    await Provider.of<CompaniesViewModel>(context, listen: false).fetchData(uID: Provider.of<UserViewModel>(context, listen: false).uID);
+                    await Provider.of<InternsViewModel>(context, listen: false).fetchData(uID: resultCompany.uID);
                     AppNavigator.pushReplace(context: context, page: Home());
                   } else {
                     AppNavigator.pushReplace(context: context, page: Verify());
@@ -169,7 +171,7 @@ class _SplashState extends State<Splash> {
   void performLogout() async{
     try{
       await Provider.of<FirebaseAuthService>(context, listen: false).signOut();
-      await storage.clearAll();
+      await storage.clear('verified');
       Provider.of<UserViewModel>(context, listen: false).setUserModel(null);
       AppNavigator.pushReplace(context: context, page: Welcome());
     }catch(error) {

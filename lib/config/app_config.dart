@@ -1,6 +1,6 @@
 
 class AppConfig {
-  static final String appName               = 'Punch Admin';
+  static final String appName               = 'Punch Intern';
 
   static final String googleStoreVersion    = '1.0';
   static final String appleStoreVersion     = '1.0';

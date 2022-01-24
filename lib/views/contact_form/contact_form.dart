@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_focus_watcher/flutter_focus_watcher.dart';
 import 'package:provider/provider.dart';
+import 'package:punch_app/constants/app_colors.dart';
 import '../../config/app_config.dart';
 import '../../helpers/app_text_area.dart';
 import '../../helpers/app_text_field.dart';
@@ -16,19 +17,17 @@ import '../../helpers/app_localizations.dart';
 import '../../models/user_model.dart';
 
 class ContactForm extends StatefulWidget {
-
   final UserModel userModel;
   bool isIntern;
   final Function() onFinish;
 
-  ContactForm({ this.userModel, this.onFinish, this.isIntern });
+  ContactForm({this.userModel, this.onFinish, this.isIntern});
 
   @override
   _ContactFormState createState() => _ContactFormState();
 }
 
 class _ContactFormState extends State<ContactForm> {
-
   final _formKey = GlobalKey<FormState>();
   final _globalScaffoldKey = GlobalKey<ScaffoldState>();
   ScrollController scrollController = ScrollController();
@@ -40,7 +39,7 @@ class _ContactFormState extends State<ContactForm> {
   void initState() {
     super.initState();
 
-    if(widget.userModel != null){
+    if (widget.userModel != null) {
       phone = widget.isIntern ? widget.userModel.mobile : widget.userModel.tel;
       address = widget.userModel.address;
     }
@@ -52,21 +51,30 @@ class _ContactFormState extends State<ContactForm> {
       child: Scaffold(
         key: _globalScaffoldKey,
         appBar: AppBar(
-          title: Text('${AppLocalizations.of(context).translate('edit')} ${AppLocalizations.of(context).translate('contact_info')}', style: TextStyle(fontSize: 18)),
+          iconTheme: IconThemeData(color: AppColors.primaryColor),
+          backgroundColor: Colors.white,
+          shadowColor: Colors.white,
+          elevation: 0,
+          title: Text(
+              '${AppLocalizations.of(context).translate('edit')} ${AppLocalizations.of(context).translate('contact_info')}',
+              style: TextStyle(fontSize: 18, color: AppColors.primaryColor)),
           centerTitle: true,
           brightness: Brightness.dark,
           actions: [
             TextButton(
               onPressed: () {
-                if(submitSt){
+                if (submitSt) {
                   updateProfile();
                 }
               },
               style: TextButton.styleFrom(
-                shape: CircleBorder(side: BorderSide(color: Colors.transparent)),
+                shape:
+                    CircleBorder(side: BorderSide(color: Colors.transparent)),
                 primary: Colors.white,
               ),
-              child: Text(AppLocalizations.of(context).translate('save'), style: TextStyle(color: Colors.white, fontSize: 15)),
+              child: Text(AppLocalizations.of(context).translate('save'),
+                  style: TextStyle(
+                      color: AppColors.primaryDarkColor, fontSize: 15)),
             ),
           ],
         ),
@@ -76,7 +84,7 @@ class _ContactFormState extends State<ContactForm> {
     );
   }
 
-  Widget contactFormBody(){
+  Widget contactFormBody() {
     return FadingEdgeScrollView.fromSingleChildScrollView(
       child: SingleChildScrollView(
         physics: BouncingScrollPhysics(),
@@ -87,54 +95,48 @@ class _ContactFormState extends State<ContactForm> {
             padding: const EdgeInsets.fromLTRB(12, 40, 12, 12),
             child: Column(
               children: [
-
                 Form(
                   key: _formKey,
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 30),
                     width: MediaQuery.of(context).size.width,
                     child: Column(
-
                       children: <Widget>[
-
                         AppTextField(
                           isEnable: submitSt,
-                          labelText: AppLocalizations.of(context).translate('phone_number'),
-                          textInputFormatter: [FilteringTextInputFormatter.deny(RegExp('[ ]'))],
+                          labelText: AppLocalizations.of(context)
+                              .translate('phone_number'),
+                          textInputFormatter: [
+                            FilteringTextInputFormatter.deny(RegExp('[ ]'))
+                          ],
                           inputAction: TextInputAction.next,
                           value: phone,
                           textInputType: TextInputType.phone,
-                          onChanged: (value){
+                          onChanged: (value) {
                             phone = value;
                           },
                         ),
-
                         AppTextArea(
                           isEnable: submitSt,
-                          labelText: AppLocalizations.of(context).translate('address'),
+                          labelText:
+                              AppLocalizations.of(context).translate('address'),
                           inputAction: TextInputAction.done,
                           textCapitalization: TextCapitalization.sentences,
                           value: address,
                           textInputType: TextInputType.streetAddress,
-                          onChanged: (value){
+                          onChanged: (value) {
                             address = value;
                           },
-
-                          onFieldSubmitted: (value){
+                          onFieldSubmitted: (value) {
                             address = value;
                             FocusScope.of(context).unfocus();
                           },
-
                         ),
-
                         SizedBox(height: 20)
-
                       ],
-
                     ),
                   ),
                 )
-
               ],
             ),
           ),
@@ -143,8 +145,7 @@ class _ContactFormState extends State<ContactForm> {
     );
   }
 
-  void updateProfile() async{
-
+  void updateProfile() async {
     FocusScope.of(context).unfocus();
 
     if (_formKey.currentState.validate()) {
@@ -162,44 +163,60 @@ class _ContactFormState extends State<ContactForm> {
         submitSt = false;
       });
 
-      try{
-
+      try {
         UserModel model = widget.userModel;
 
-        if(widget.isIntern){
+        if (widget.isIntern) {
           model.mobile = phone != null ? phone.trim() : null;
           widget.userModel.mobile = phone != null ? phone.trim() : null;
-        }else{
+        } else {
           model.tel = phone != null ? phone.trim() : null;
           widget.userModel.tel = phone != null ? phone.trim() : null;
         }
         model.address = address != null ? address?.trim() : null;
         widget.userModel.address = address != null ? address?.trim() : null;
 
-        dynamic result = await Provider.of<FirestoreService>(context, listen: false).updateContactInfo(userModel: model, isIntern: widget.isIntern);
+        dynamic result =
+            await Provider.of<FirestoreService>(context, listen: false)
+                .updateContactInfo(userModel: model, isIntern: widget.isIntern);
 
-        if(result is bool && result){
-          if(widget.isIntern){
-            Provider.of<InternsViewModel>(context, listen: false).updateList(model: model);
-          }else{
-            Provider.of<CompaniesViewModel>(context, listen: false).updateList(model: model);
+        if (result is bool && result) {
+          if (widget.isIntern) {
+            Provider.of<InternsViewModel>(context, listen: false)
+                .updateList(model: model);
+          } else {
+            Provider.of<CompaniesViewModel>(context, listen: false)
+                .updateList(model: model);
           }
 
-          await Future.delayed(Duration(milliseconds: 1500), (){Navigator.pop(context);});
-          await Future.delayed(Duration(milliseconds: 800), (){Message.show(_globalScaffoldKey, AppLocalizations.of(context).translate('contact_update_success'));});
-          await Future.delayed(Duration(milliseconds: 1500), (){Navigator.pop(context);});
+          await Future.delayed(Duration(milliseconds: 1500), () {
+            Navigator.pop(context);
+          });
+          await Future.delayed(Duration(milliseconds: 800), () {
+            Message.show(
+                _globalScaffoldKey,
+                AppLocalizations.of(context)
+                    .translate('contact_update_success'));
+          });
+          await Future.delayed(Duration(milliseconds: 1500), () {
+            Navigator.pop(context);
+          });
           widget.onFinish();
-        }else{
+        } else {
           setState(() {
             submitSt = true;
           });
           widget.onFinish();
-          await Future.delayed(Duration(milliseconds: 1500), (){Navigator.pop(context);});
-          await Future.delayed(Duration(milliseconds: 800), (){Message.show(_globalScaffoldKey, AppLocalizations.of(context).translate('contact_update_fail'));});
+          await Future.delayed(Duration(milliseconds: 1500), () {
+            Navigator.pop(context);
+          });
+          await Future.delayed(Duration(milliseconds: 800), () {
+            Message.show(_globalScaffoldKey,
+                AppLocalizations.of(context).translate('contact_update_fail'));
+          });
         }
-
-      }catch(error){
-        if(!AppConfig.isPublished){
+      } catch (error) {
+        if (!AppConfig.isPublished) {
           print('$error');
         }
 
@@ -207,8 +224,13 @@ class _ContactFormState extends State<ContactForm> {
           submitSt = true;
         });
 
-        await Future.delayed(Duration(milliseconds: 1500), (){Navigator.pop(context);});
-        await Future.delayed(Duration(milliseconds: 800), (){Message.show(_globalScaffoldKey, AppLocalizations.of(context).translate('contact_update_fail'));});
+        await Future.delayed(Duration(milliseconds: 1500), () {
+          Navigator.pop(context);
+        });
+        await Future.delayed(Duration(milliseconds: 800), () {
+          Message.show(_globalScaffoldKey,
+              AppLocalizations.of(context).translate('contact_update_fail'));
+        });
       }
     }
   }

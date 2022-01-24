@@ -32,23 +32,6 @@ class _TimePickerFieldState extends State<TimePickerField> {
   Widget build(BuildContext context) {
 
     return GestureDetector(
-      onTap: () async{
-        if(widget.enabled){
-          var time = await getSelectedTime(helpText: widget.helpText);
-          setState(() {
-            selectedTime = '${widget.hint}: ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-          });
-          widget.onTimePicked(time);
-        }
-      },
-      onLongPress: (){
-        if(widget.enabled){
-          setState(() {
-            selectedTime = null;
-          });
-          widget.onTimePicked(null);
-        }
-      },
       child: Container(
         height: 53,
         margin: EdgeInsets.only(top: 12),

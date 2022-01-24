@@ -23,7 +23,6 @@ class InternsViewModel extends ChangeNotifier{
       notifyListeners();
       return true;
     }catch(error){
-      print('error: $error');
       return error.toString();
     }
   }

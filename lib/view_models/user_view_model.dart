@@ -21,7 +21,7 @@ class UserViewModel extends ChangeNotifier{
   }
 
   String get email {
-    return this._userModel.email;
+    return this._userModel?.email;
   }
 
   String get tel {
@@ -44,8 +44,20 @@ class UserViewModel extends ChangeNotifier{
     return this._userModel.imageURL;
   }
 
+  String get logoURL {
+    return this._userModel.logoURL;
+  }
+
+  String get companyName {
+    return this._userModel.companyName;
+  }
+
+  String get companyID {
+    return this._userModel.companyID;
+  }
+
   String get regCode {
-    return this._userModel.regCode;
+    return this._userModel?.regCode;
   }
 
   double get roleID {
@@ -62,6 +74,10 @@ class UserViewModel extends ChangeNotifier{
 
   bool get verified {
     return this._userModel.verified;
+  }
+
+  UserModel get userModel {
+    return this._userModel;
   }
 
   void setUID(String value) {

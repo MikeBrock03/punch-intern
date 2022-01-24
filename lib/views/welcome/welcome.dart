@@ -3,16 +3,14 @@ import 'package:clippy_flutter/diagonal.dart';
 import 'package:flutter/material.dart';
 import '../../views/verify/verify.dart';
 import '../../views/login/login.dart';
-import '../../views/register/register.dart';
 import '../../config/app_config.dart';
 import '../../helpers/app_navigator.dart';
 import '../../constants/app_colors.dart';
 import '../../helpers/app_localizations.dart';
 
 class Welcome extends StatelessWidget {
-
   final dynamic verified;
-  Welcome({ this.verified });
+  Welcome({this.verified});
 
   final _globalScaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -21,6 +19,7 @@ class Welcome extends StatelessWidget {
     return Scaffold(
       key: _globalScaffoldKey,
       appBar: AppBar(
+        iconTheme: IconThemeData(color: AppColors.primaryColor),
         brightness: Brightness.dark,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -31,8 +30,7 @@ class Welcome extends StatelessWidget {
     );
   }
 
-  Widget welcomeBody(BuildContext context){
-
+  Widget welcomeBody(BuildContext context) {
     return Stack(
       children: [
         Positioned(
@@ -41,7 +39,6 @@ class Welcome extends StatelessWidget {
             clipHeight: 150.0,
             axis: Axis.horizontal,
             position: DiagonalPosition.BOTTOM_LEFT,
-
             child: Container(
               color: AppColors.primaryColor,
               width: MediaQuery.of(context).size.width,
@@ -49,7 +46,6 @@ class Welcome extends StatelessWidget {
             ),
           ),
         ),
-
         FadeInDown(
           from: 10,
           child: Container(
@@ -60,22 +56,32 @@ class Welcome extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(height: 50),
-                Center(child: Text(greeting(context), style: TextStyle(fontSize: 25, color: Colors.white),)),
+                Center(
+                    child: Text(
+                  greeting(context),
+                  style: TextStyle(fontSize: 25, color: Colors.white),
+                )),
                 SizedBox(height: MediaQuery.of(context).size.height / 10),
-                Center(child: Text(AppLocalizations.of(context).translate('welcome_to'), style: TextStyle(fontSize: 18, color: Colors.white))),
+                Center(
+                    child: Text(
+                        AppLocalizations.of(context).translate('welcome_to'),
+                        style: TextStyle(fontSize: 18, color: Colors.white))),
                 SizedBox(height: 10),
-                Center(child: Text(AppConfig.appName, style: TextStyle(fontSize: 35, color: Colors.white, fontWeight: FontWeight.bold))),
+                Center(
+                    child: Text(AppConfig.appName,
+                        style: TextStyle(
+                            fontSize: 35,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold))),
               ],
             ),
           ),
         ),
-
         Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-
               Container(
                 width: 130,
                 height: 130,
@@ -90,78 +96,70 @@ class Welcome extends StatelessWidget {
                         blurRadius: 15,
                         offset: Offset(0, 1), // changes position of shadow
                       )
-                    ]
-                ),
+                    ]),
               ),
               SizedBox(height: 80.0),
             ],
           ),
         ),
-
         Positioned(
-          bottom: 70,
-          right: 0,
-          left: 0,
-          child: FadeInUp(
-            from: 10,
-            child: Column(
-              children: [
-
-                SizedBox(
-                  width: 210,
-                  height: 55,
-                  child: OutlinedButton(
-                      onPressed: () async{
-                        await Future.delayed(Duration(milliseconds: 200));
-                        AppNavigator.pushReplace(context: context, page: Login(verified: verified));
-                      },
-                      child: Text(AppLocalizations.of(context).translate('login'), style: TextStyle(color: AppColors.primaryColor, fontSize: 15, fontWeight: FontWeight.normal)),
-                      style: OutlinedButton.styleFrom(
-                          side: BorderSide(width: 1, color: AppColors.primaryColor),
-                          shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0))
-                      )
+            bottom: 70,
+            right: 0,
+            left: 0,
+            child: FadeInUp(
+              from: 10,
+              child: Column(
+                children: [
+                  SizedBox(
+                    width: 210,
+                    height: 55,
+                    child: OutlinedButton(
+                        onPressed: () async {
+                          await Future.delayed(Duration(milliseconds: 200));
+                          AppNavigator.pushReplace(
+                              context: context,
+                              page: Login(verified: verified));
+                        },
+                        child: Text(
+                            AppLocalizations.of(context).translate('login'),
+                            style: TextStyle(
+                                color: AppColors.primaryColor,
+                                fontSize: 15,
+                                fontWeight: FontWeight.normal)),
+                        style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                                width: 1, color: AppColors.primaryColor),
+                            shape: new RoundedRectangleBorder(
+                                borderRadius:
+                                    new BorderRadius.circular(30.0)))),
                   ),
-                ),
-                SizedBox(height: 20),
-                SizedBox(
-                  width: 210,
-                  height: 55,
-                  child: OutlinedButton(
-                    onPressed: () async{
-                      await Future.delayed(Duration(milliseconds: 200));
-                      AppNavigator.pushReplace(context: context, page: Register(verified: verified));
-                    },
-                    child: Text(AppLocalizations.of(context).translate('register'), style: TextStyle(color: AppColors.primaryColor, fontSize: 15, fontWeight: FontWeight.normal)),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(width: 1, color: AppColors.primaryColor),
-                      shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0))
-                    )
+                  SizedBox(height: 20),
+                  SizedBox(
+                    width: 210,
+                    height: 55,
+                    child: OutlinedButton(
+                        onPressed: () async {
+                          await Future.delayed(Duration(milliseconds: 200));
+                          AppNavigator.pushReplace(
+                              context: context, page: Verify());
+                        },
+                        child: Text(
+                            AppLocalizations.of(context)
+                                .translate('enter_reg_code'),
+                            style: TextStyle(
+                                color: AppColors.primaryColor,
+                                fontSize: 15,
+                                fontWeight: FontWeight.normal)),
+                        style: OutlinedButton.styleFrom(
+                            side: BorderSide(
+                                width: 1, color: AppColors.primaryColor),
+                            shape: new RoundedRectangleBorder(
+                                borderRadius:
+                                    new BorderRadius.circular(30.0)))),
                   ),
-                ),
-                verified != null && verified == false ? Column(
-                  children: [
-                    SizedBox(height: 20),
-                    SizedBox(
-                      width: 210,
-                      height: 55,
-                      child: OutlinedButton(
-                          onPressed: () async{
-                            await Future.delayed(Duration(milliseconds: 200));
-                            AppNavigator.pushReplace(context: context, page: Verify());
-                          },
-                          child: Text(AppLocalizations.of(context).translate('enter_reg_code'), style: TextStyle(color: AppColors.primaryColor, fontSize: 15, fontWeight: FontWeight.normal)),
-                          style: OutlinedButton.styleFrom(
-                              side: BorderSide(width: 1, color: AppColors.primaryColor),
-                              shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0))
-                          )
-                      ),
-                    ),
-                  ],
-                ) : Container()
-              ],
-            ),
-          )
-        )
+                ],
+              ),
+            ))
       ],
     );
   }
